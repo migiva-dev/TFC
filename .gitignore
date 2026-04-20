@@ -1,8 +1,9 @@
-# Añade todos los archivos al seguimiento de Git
-git add .
+# Archivo de configuración con datos sensibles (contraseñas de BD)
+includes/config.php
 
-# Crea el primer commit con un mensaje descriptivo
-git commit -m "feat: estructura inicial del proyecto de peluquería"
+# Archivos del sistema
+.DS_Store
+Thumbs.db
 
-# Sube los cambios a GitHub
-git push origin main
+# Logs de errores
+*.log
