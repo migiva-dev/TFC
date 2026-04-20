@@ -1,0 +1,8 @@
+# Añade todos los archivos al seguimiento de Git
+git add .
+
+# Crea el primer commit con un mensaje descriptivo
+git commit -m "feat: estructura inicial del proyecto de peluquería"
+
+# Sube los cambios a GitHub
+git push origin main
