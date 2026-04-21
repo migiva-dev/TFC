@@ -5,7 +5,6 @@
 //              Incluye el menú de navegación principal.
 //              Se incluye al inicio de cada página pública.
 // =====================================================
-
 require_once __DIR__ . '/funciones.php';
 iniciar_sesion();
 ?>
@@ -15,7 +14,9 @@ iniciar_sesion();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($titulo_pagina) ? limpiar($titulo_pagina) . ' — ' . SITIO_NOMBRE : SITIO_NOMBRE ?></title>
-    <link rel="stylesheet" href="<?= SITIO_URL ?>/../assets/css/estilo.css">
+
+    <!-- Ruta absoluta al CSS para que funcione en AwardSpace -->
+    <link rel="stylesheet" href="http://tfc-peluqueria.atwebpages.com/assets/css/estilo.css">
 </head>
 <body>
 
@@ -24,8 +25,16 @@ iniciar_sesion();
      ================================================ -->
 <header>
     <nav>
+
         <!-- Logo de la peluquería -->
         <a href="<?= SITIO_URL ?>/index.php" class="logo">Dioni</a>
+
+        <!-- Botón hamburguesa visible solo en móvil -->
+        <button class="menu-hamburguesa" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
         <!-- Menú de navegación -->
         <ul class="nav-links">
@@ -42,5 +51,6 @@ iniciar_sesion();
                 <li><a href="<?= SITIO_URL ?>/reservar.php" class="btn-nav">Reservar</a></li>
             <?php endif; ?>
         </ul>
+
     </nav>
 </header>
