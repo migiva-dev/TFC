@@ -66,13 +66,14 @@ require_once '../includes/header.php';
                 <?= number_format($servicio['precio'], 2) ?>€
             </div>
 
+            <!-- Duración en minutos -->
             <div class="servicio-duracion">
                 <?= limpiar($servicio['duracion']) ?> min
             </div>
 
             <!-- Botón para reservar este servicio concreto -->
             <!-- Pasamos el id del servicio por GET a reservar.php -->
-             
+
             <div style="margin-top:25px;">
                 <a href="reservar.php?servicio=<?= $servicio['id'] ?>"
                    class="btn-principal"
