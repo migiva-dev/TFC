@@ -70,4 +70,48 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 4000);
     });
 
+    // ---------------------------------------------------
+    // MENÚ HAMBURGUESA PARA MÓVIL
+    // Muestra y oculta el menú en pantallas pequeñas
+    // ---------------------------------------------------
+    const hamburguesa = document.querySelector('.menu-hamburguesa');
+    const navLinks    = document.querySelector('.nav-links');
+
+    if (hamburguesa && navLinks) {
+        hamburguesa.addEventListener('click', function () {
+            // Alternamos la clase 'abierto' para mostrar/ocultar el menú
+            navLinks.classList.toggle('abierto');
+        });
+
+        // Cerramos el menú al pulsar cualquier enlace
+        navLinks.querySelectorAll('a').forEach(function (enlace) {
+            enlace.addEventListener('click', function () {
+                navLinks.classList.remove('abierto');
+            });
+        });
+    }
+
+    // ---------------------------------------------------
+    // ACTUALIZAR HORAS OCUPADAS AL CAMBIAR LA FECHA
+    // Cuando el usuario cambia la fecha recargamos
+    // el formulario para actualizar las horas disponibles
+    // ---------------------------------------------------
+    const inputFechaReserva = document.getElementById('fecha');
+    if (inputFechaReserva) {
+        inputFechaReserva.addEventListener('change', function () {
+            // Buscamos el formulario padre
+            const form = this.closest('form');
+            if (form) {
+                // Añadimos un campo oculto para indicar que es solo
+                // una consulta de horas, no una reserva real
+                const input = document.createElement('input');
+                input.type  = 'hidden';
+                input.name  = 'consultar_horas';
+                input.value = '1';
+                form.appendChild(input);
+                form.submit();
+            }
+        });
+    }
+
 });
