@@ -1,0 +1,57 @@
+/* =====================================================
+   ARCHIVO: assets/css/estilo.css
+   Descripción: Estilos generales de la web.
+                Paleta: negro profundo, blanco y plateado.
+                Inspirado en el logo DIONI.
+   ===================================================== */
+
+/* -- Importación de fuentes de Google Fonts -- */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500&display=swap');
+
+/* -- Variables de color y tipografía reutilizables en toda la web -- */
+:root {
+    --negro:          #0a0a0a;     /* Fondo principal negro profundo */
+    --negro-suave:    #141414;     /* Fondo de tarjetas y secciones */
+    --negro-borde:    #222222;     /* Bordes sutiles entre elementos */
+    --plateado:       #c0c0c0;     /* Color plateado principal */
+    --plateado-claro: #dcdcdc;     /* Plateado más claro para hovers */
+    --blanco:         #f5f5f5;     /* Texto principal */
+    --blanco-suave:   #a0a0a0;     /* Texto secundario y subtítulos */
+    --fuente-titulo:  'Cormorant Garamond', serif;  /* Títulos elegantes */
+    --fuente-cuerpo:  'Montserrat', sans-serif;      /* Texto general limpio */
+}
+
+/* -- Reset básico: eliminamos márgenes y padding por defecto -- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* -- Estilos base del body -- */
+body {
+    background-color: var(--negro);
+    color: var(--blanco);
+    font-family: var(--fuente-cuerpo);
+    font-weight: 300;
+    line-height: 1.7;
+    min-height: 100vh;
+}
+
+/* -- Títulos con fuente elegante serif -- */
+h1, h2, h3, h4 {
+    font-family: var(--fuente-titulo);
+    font-weight: 400;
+    letter-spacing: 2px;
+}
+
+/* -- Enlace genérico -- */
+a {
+    color: var(--plateado);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--plateado-claro);
+}
