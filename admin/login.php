@@ -27,7 +27,63 @@ if (es_admin()) {
 
 $error = '';
 
-// Lógica de autenticación irá aquí
+// -------------------------------------------------------
+// Procesamos el formulario cuando se envía (método POST)
+// -------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Recogemos los datos del formulario
+    $usuario  = trim($_POST['usuario']  ?? '');
+    $password = trim($_POST['password'] ?? '');
+
+    // -- Validaciones básicas --
+    if (empty($usuario) || empty($password)) {
+        $error = 'Por favor, rellena todos los campos.';
+
+    } else {
+
+        // Buscamos al administrador por su usuario en la BD
+        // Usamos la tabla 'administradores', no 'usuarios'
+        $stmt = $conexion->prepare(
+            "SELECT id, nombre, password FROM administradores WHERE usuario = ?"
+        );
+        $stmt->bind_param('s', $usuario);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows === 0) {
+            // No existe ningún admin con ese usuario
+            $error = 'Usuario o contraseña incorrectos.';
+
+        } else {
+            // Obtenemos los datos del admin encontrado
+            $stmt->bind_result($id, $nombre, $password_bd);
+            $stmt->fetch();
+
+            // Verificamos la contraseña con bcrypt
+            if (!password_verify($password, $password_bd)) {
+                $error = 'Usuario o contraseña incorrectos.';
+
+            } else {
+                // Credenciales correctas: creamos la sesión del admin
+                // Usamos ADMIN_SESSION_KEY, independiente de la sesión de cliente
+                $_SESSION[ADMIN_SESSION_KEY] = [
+                    'id'     => $id,
+                    'nombre' => $nombre
+                ];
+
+                $stmt->close();
+
+                // Redirigimos al panel principal del admin
+                redirigir('../admin/dashboard.php');
+            }
+        }
+
+        $stmt->close();
+    }
+}
+
+// Incluimos la cabecera común
 
 // Incluimos la cabecera común
 require_once dirname(__DIR__) . '/includes/header.php';
