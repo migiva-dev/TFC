@@ -194,13 +194,19 @@ require_once '../includes/header.php';
             </select>
         </div>
 
-        <!-- Fecha -->
+        <!-- Fecha con calendario visual -->
         <div class="campo-grupo">
             <label for="fecha">Fecha *</label>
             <input type="date" id="fecha" name="fecha"
                    min="<?= date('Y-m-d') ?>"
                    value="<?= limpiar($_POST['fecha'] ?? '') ?>"
+                   style="cursor:pointer;"
                    required>
+            <!-- Aviso de días cerrados -->
+            <p style="font-size:10px; color:var(--blanco-suave);
+                      letter-spacing:1px; margin-top:6px;">
+                🗓 Abrimos de lunes a sábado
+            </p>
         </div>
 
         <!-- Hora -->
