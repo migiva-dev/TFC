@@ -43,6 +43,49 @@ require_once '../includes/header.php';
 </div>
 
 <!-- Contenido de servicios irá aquí -->
+ <!-- ================================================
+     GRID DE SERVICIOS
+     ================================================ -->
+<div class="seccion" style="padding-top:20px;">
+    <div class="servicios-grid">
+        <?php
+        // Comprobamos que la consulta devolvió resultados
+        if ($resultado && $resultado->num_rows > 0):
+            // Recorremos cada servicio y lo mostramos
+            while ($servicio = $resultado->fetch_assoc()):
+        ?>
+        <div class="servicio-card">
+
+            <!-- Nombre del servicio -->
+            <h3><?= limpiar($servicio['nombre']) ?></h3>
+
+            <!-- Descripción del servicio -->
+            <p><?= limpiar($servicio['descripcion']) ?></p>
+
+            <!-- Precio destacado en plateado -->
+            <div class="servicio-precio">
+                <?= number_format($servicio['precio'], 2) ?>€
+            </div>
+
+            <!-- Duración en minutos -->
+            <div class="servicio-duracion">
+                <?= limpiar($servicio['duracion']) ?> min
+            </div>
+
+        </div>
+        <?php
+            endwhile;
+        else:
+        ?>
+            <!-- Mensaje si no hay servicios en la BD -->
+            <p style="text-align:center; color:var(--blanco-suave); grid-column:1/-1;">
+                No hay servicios disponibles en este momento.
+            </p>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Aviso de pago irá aquí -->
 
 <?php
 // Cerramos la conexión a la BD
