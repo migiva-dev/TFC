@@ -84,7 +84,19 @@ require_once '../includes/header.php';
     </div>
 </div>
 
-<!-- Aviso de pago irá aquí -->
+<!-- ================================================
+     AVISO DE PAGO EN ESTABLECIMIENTO
+     ================================================ -->
+<div style="background-color:var(--negro-suave);
+            border-top:1px solid var(--negro-borde);
+            border-bottom:1px solid var(--negro-borde);">
+    <div class="seccion" style="text-align:center; padding:50px 40px;">
+        <p style="font-size:11px; letter-spacing:3px;
+                  color:var(--blanco-suave); text-transform:uppercase;">
+            💳 &nbsp; El pago se realiza únicamente en el establecimiento
+        </p>
+    </div>
+</div>
 
 <?php
 // Cerramos la conexión a la BD
