@@ -22,7 +22,27 @@ $resultado = $conexion->query("SELECT * FROM servicios ORDER BY precio ASC");
 require_once '../includes/header.php';
 ?>
 
-<!-- Contenido de la página irá aquí -->
+<!-- ================================================
+     CABECERA DE LA PÁGINA
+     ================================================ -->
+<div style="padding: 80px 40px 40px; text-align:center;">
+
+    <!-- Línea decorativa plateada -->
+    <div class="hero-linea"></div>
+
+    <!-- Título de la página -->
+    <h1 style="font-size: clamp(32px, 5vw, 56px); letter-spacing:10px; text-transform:uppercase;">
+        Servicios
+    </h1>
+
+    <!-- Subtítulo -->
+    <p style="color:var(--blanco-suave); font-size:11px; letter-spacing:3px; margin-top:15px;">
+        Calidad y precisión en cada corte
+    </p>
+
+</div>
+
+<!-- Contenido de servicios irá aquí -->
 
 <?php
 // Cerramos la conexión a la BD
