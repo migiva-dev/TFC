@@ -1,0 +1,60 @@
+# =====================================================
+# ARCHIVO: .htaccess
+# Descripción: Configuración de seguridad del servidor.
+#              Protege carpetas sensibles y mejora
+#              la seguridad general de la aplicación.
+# =====================================================
+
+# -- Activamos el motor de reescritura de Apache --
+RewriteEngine On
+
+# -------------------------------------------------------
+# PROTECCIÓN DE LA CARPETA INCLUDES
+# Nadie puede acceder directamente a los archivos PHP
+# de includes desde el navegador
+# -------------------------------------------------------
+<FilesMatch "^(config|db|funciones|header|footer)\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# -------------------------------------------------------
+# PROTECCIÓN DE LA CARPETA ADMIN
+# Si alguien intenta acceder a /admin sin estar logueado
+# el propio PHP lo redirige al login del admin.
+# Esta regla añade una capa extra de protección.
+# -------------------------------------------------------
+<IfModule mod_rewrite.c>
+    # Evitamos que se listen los archivos de las carpetas
+    Options -Indexes
+</IfModule>
+
+# -------------------------------------------------------
+# CABECERAS DE SEGURIDAD
+# Protegen contra ataques comunes como XSS o clickjacking
+# -------------------------------------------------------
+<IfModule mod_headers.c>
+    # Evita que la web se cargue dentro de un iframe (clickjacking)
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # Evita que el navegador adivine el tipo de contenido
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Activa el filtro XSS del navegador
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# -------------------------------------------------------
+# PROTECCIÓN DE ARCHIVOS SENSIBLES
+# Nadie puede descargar el .htaccess ni el .gitignore
+# -------------------------------------------------------
+<FilesMatch "^\.">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# -------------------------------------------------------
+# PÁGINA DE ERROR PERSONALIZADA
+# Si hay un error 404 redirigimos a la página principal
+# -------------------------------------------------------
+ErrorDocument 404 /public/index.php
