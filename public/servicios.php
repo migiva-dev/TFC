@@ -42,7 +42,6 @@ require_once '../includes/header.php';
 
 </div>
 
-<!-- Contenido de servicios irá aquí -->
  <!-- ================================================
      GRID DE SERVICIOS
      ================================================ -->
