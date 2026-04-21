@@ -89,7 +89,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
 
-<!-- Contenido irá aquí -->
+<!-- ================================================
+     FORMULARIO DE LOGIN DEL ADMINISTRADOR
+     ================================================ -->
+<div class="formulario-contenedor">
+
+    <h2>Administración</h2>
+    <div class="linea-deco"></div>
+
+    <!-- Aviso de acceso denegado si intentó entrar sin login -->
+    <?php if (isset($_GET['aviso']) && $_GET['aviso'] === 'acceso_denegado'): ?>
+        <div class="aviso aviso-error">
+            Acceso restringido. Identifícate para continuar.
+        </div>
+    <?php endif; ?>
+
+    <!-- Mensaje de error si las credenciales son incorrectas -->
+    <?php if (!empty($error)): ?>
+        <div class="aviso aviso-error"><?= limpiar($error) ?></div>
+    <?php endif; ?>
+
+    <!-- Formulario de login del administrador -->
+    <form method="POST" action="login.php">
+
+        <!-- Usuario -->
+        <div class="campo-grupo">
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" name="usuario"
+                   value="<?= limpiar($_POST['usuario'] ?? '') ?>"
+                   placeholder="Tu usuario de administrador"
+                   autocomplete="off" required>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="campo-grupo">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Tu contraseña"
+                   autocomplete="off" required>
+        </div>
+
+        <!-- Botón de acceso -->
+        <button type="submit" class="btn-form">Acceder al panel</button>
+
+    </form>
+
+    <!-- Enlace para volver a la web pública -->
+    <p class="formulario-enlace">
+        <a href="../public/index.php">← Volver a la web</a>
+    </p>
+
+</div>
+
 
 <?php
 $conexion->close();
