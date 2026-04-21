@@ -105,7 +105,7 @@ require_once '../includes/header.php';
     <div class="seccion" style="text-align:center; padding:50px 40px;">
         <p style="font-size:11px; letter-spacing:3px;
                   color:var(--blanco-suave); text-transform:uppercase;">
-            💳 &nbsp; El pago se realiza únicamente en el establecimiento
+             &nbsp; El pago se realiza únicamente en el establecimiento
         </p>
     </div>
 </div>
