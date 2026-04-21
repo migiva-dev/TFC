@@ -36,6 +36,26 @@ for ($h = 9; $h < 20; $h++) {
 $error  = '';
 $exito  = '';
 
+// -- Obtenemos las horas ocupadas para la fecha seleccionada --
+// Se usa en JavaScript para deshabilitar horas en el selector
+$fecha_consulta = $_POST['fecha'] ?? date('Y-m-d');
+$horas_ocupadas = [];
+
+$stmt = $conexion->prepare(
+    "SELECT hora FROM reservas
+     WHERE fecha = ? AND estado != 'cancelada'"
+);
+$stmt->bind_param('s', $fecha_consulta);
+$stmt->execute();
+$resultado_horas = $stmt->get_result();
+while ($fila = $resultado_horas->fetch_assoc()) {
+    // Guardamos solo HH:MM para comparar con el selector
+    $horas_ocupadas[] = substr($fila['hora'], 0, 5);
+}
+$stmt->close();
+
+
+
 // -------------------------------------------------------
 // Procesamos el formulario cuando se envía (método POST)
 // -------------------------------------------------------
