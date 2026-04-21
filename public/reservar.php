@@ -36,7 +36,71 @@ for ($h = 9; $h < 20; $h++) {
 $error  = '';
 $exito  = '';
 
-// Lógica del formulario y HTML irán aquí
+// -------------------------------------------------------
+// Procesamos el formulario cuando se envía (método POST)
+// -------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Recogemos y limpiamos los datos del formulario
+    $servicio_id = intval($_POST['servicio_id'] ?? 0);
+    $fecha       = trim($_POST['fecha']         ?? '');
+    $hora        = trim($_POST['hora']          ?? '');
+    $notas       = trim($_POST['notas']         ?? '');
+
+    // -- Validaciones --
+
+    // Todos los campos obligatorios deben estar rellenos
+    if (empty($servicio_id) || empty($fecha) || empty($hora)) {
+        $error = 'Por favor, rellena todos los campos obligatorios.';
+
+    // La fecha no puede ser anterior a hoy
+    } elseif ($fecha < date('Y-m-d')) {
+        $error = 'La fecha no puede ser anterior a hoy.';
+
+    // No se puede reservar en domingo (0 = domingo en PHP)
+    } elseif (date('w', strtotime($fecha)) == 0) {
+        $error = 'Lo sentimos, los domingos estamos cerrados.';
+
+    } else {
+
+        // Comprobamos que no haya ya una reserva para esa fecha y hora
+        $stmt = $conexion->prepare(
+            "SELECT id FROM reservas
+             WHERE fecha = ? AND hora = ?
+             AND estado != 'cancelada'"
+        );
+        $stmt->bind_param('ss', $fecha, $hora);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            // Ya hay una reserva en ese horario
+            $error = 'Ese horario ya está ocupado. Por favor elige otro.';
+            $stmt->close();
+
+        } else {
+            $stmt->close();
+
+            // Insertamos la reserva en la BD con estado 'pendiente'
+            $stmt = $conexion->prepare(
+                "INSERT INTO reservas (usuario_id, servicio_id, fecha, hora, notas)
+                 VALUES (?, ?, ?, ?, ?)"
+            );
+            $stmt->bind_param('iisss', $usuario_id, $servicio_id, $fecha, $hora, $notas);
+
+            if ($stmt->execute()) {
+                $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
+                         date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
+            } else {
+                $error = 'Error al guardar la reserva. Inténtalo de nuevo.';
+            }
+
+            $stmt->close();
+        }
+    }
+}
+
+// Incluimos la cabecera común
 
 // Incluimos la cabecera común
 require_once '../includes/header.php';
