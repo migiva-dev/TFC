@@ -106,7 +106,112 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once '../includes/header.php';
 ?>
 
-<!-- Contenido irá aquí -->
+<!-- ================================================
+     FORMULARIO DE RESERVA
+     ================================================ -->
+<div class="formulario-contenedor" style="max-width:560px;">
+
+    <h2>Reservar cita</h2>
+    <div class="linea-deco"></div>
+
+    <!-- Saludo personalizado con el nombre del usuario -->
+    <p style="text-align:center; color:var(--blanco-suave);
+              font-size:11px; letter-spacing:2px; margin-bottom:30px;">
+        Hola, <?= limpiar($usuario_nombre) ?>. Elige tu servicio y horario.
+    </p>
+
+    <!-- Mensaje de error si lo hay -->
+    <?php if (!empty($error)): ?>
+        <div class="aviso aviso-error"><?= limpiar($error) ?></div>
+    <?php endif; ?>
+
+    <!-- Mensaje de éxito si la reserva se hizo correctamente -->
+    <?php if (!empty($exito)): ?>
+        <div class="aviso aviso-exito"><?= limpiar($exito) ?></div>
+    <?php endif; ?>
+
+    <!-- Solo mostramos el formulario si no hay reserva exitosa -->
+    <?php if (empty($exito)): ?>
+    <form method="POST" action="reservar.php">
+
+        <!-- Servicio -->
+        <div class="campo-grupo">
+            <label for="servicio_id">Servicio *</label>
+            <select id="servicio_id" name="servicio_id" required>
+                <option value="">— Selecciona un servicio —</option>
+                <?php
+                // Rellenamos el select con los servicios de la BD
+                if ($servicios && $servicios->num_rows > 0):
+                    // Si viene de servicios.php con ?servicio=X lo preseleccionamos
+                    $servicio_preseleccionado = intval($_GET['servicio'] ?? 0);
+                    while ($s = $servicios->fetch_assoc()):
+                        $selected = ($s['id'] == $servicio_preseleccionado) ? 'selected' : '';
+                ?>
+                <option value="<?= $s['id'] ?>" <?= $selected ?>>
+                    <?= limpiar($s['nombre']) ?> —
+                    <?= number_format($s['precio'], 2) ?>€
+                    (<?= $s['duracion'] ?> min)
+                </option>
+                <?php
+                    endwhile;
+                endif;
+                ?>
+            </select>
+        </div>
+
+        <!-- Fecha -->
+        <div class="campo-grupo">
+            <label for="fecha">Fecha *</label>
+            <input type="date" id="fecha" name="fecha"
+                   min="<?= date('Y-m-d') ?>"
+                   value="<?= limpiar($_POST['fecha'] ?? '') ?>"
+                   required>
+        </div>
+
+        <!-- Hora -->
+        <div class="campo-grupo">
+            <label for="hora">Hora *</label>
+            <select id="hora" name="hora" required>
+                <option value="">— Selecciona una hora —</option>
+                <?php
+                // Rellenamos el select con las horas disponibles
+                foreach ($horas_disponibles as $hora_opcion):
+                ?>
+                <option value="<?= $hora_opcion ?>"
+                    <?= (isset($_POST['hora']) && $_POST['hora'] === $hora_opcion) ? 'selected' : '' ?>>
+                    <?= $hora_opcion ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <!-- Notas opcionales -->
+        <div class="campo-grupo">
+            <label for="notas">Notas (opcional)</label>
+            <textarea id="notas" name="notas"
+                      rows="3"
+                      placeholder="Alguna preferencia o indicación..."
+                      style="resize:vertical;"><?= limpiar($_POST['notas'] ?? '') ?></textarea>
+        </div>
+
+        <!-- Aviso de pago -->
+        <p style="font-size:10px; letter-spacing:2px; color:var(--blanco-suave);
+                  text-align:center; margin-bottom:20px; text-transform:uppercase;">
+            💳 El pago se realiza en el establecimiento
+        </p>
+
+        <!-- Botón de envío -->
+        <button type="submit" class="btn-form">Confirmar reserva</button>
+
+    </form>
+    <?php endif; ?>
+
+    <!-- Enlace para ver todos los servicios -->
+    <p class="formulario-enlace">
+        <a href="servicios.php">← Ver todos los servicios</a>
+    </p>
+
+</div>
 
 <?php
 $conexion->close();
