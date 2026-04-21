@@ -212,7 +212,7 @@ require_once '../includes/header.php';
         <!-- Aviso de pago -->
         <p style="font-size:10px; letter-spacing:2px; color:var(--blanco-suave);
                   text-align:center; margin-bottom:20px; text-transform:uppercase;">
-            💳 El pago se realiza en el establecimiento
+             El pago se realiza en el establecimiento
         </p>
 
         <!-- Botón de envío -->
