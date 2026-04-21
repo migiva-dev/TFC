@@ -114,6 +114,13 @@ require_once '../includes/header.php';
     <h2>Reservar cita</h2>
     <div class="linea-deco"></div>
 
+    <!-- Mensaje de bienvenida si acaba de registrarse -->
+    <?php if (isset($_GET['bienvenido'])): ?>
+        <div class="aviso aviso-exito" style="margin-bottom:25px;">
+            ¡Bienvenido, <?= limpiar($usuario_nombre) ?>! Tu cuenta ha sido creada correctamente.
+        </div>
+    <?php endif; ?>
+
     <!-- Saludo personalizado con el nombre del usuario -->
     <p style="text-align:center; color:var(--blanco-suave);
               font-size:11px; letter-spacing:2px; margin-bottom:30px;">
