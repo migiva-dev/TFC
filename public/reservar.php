@@ -209,21 +209,27 @@ require_once '../includes/header.php';
             </p>
         </div>
 
-        <!-- Hora -->
+     <!-- Hora con horas ocupadas deshabilitadas -->
         <div class="campo-grupo">
             <label for="hora">Hora *</label>
             <select id="hora" name="hora" required>
                 <option value="">— Selecciona una hora —</option>
-                <?php
-                // Rellenamos el select con las horas disponibles
-                foreach ($horas_disponibles as $hora_opcion):
+                <?php foreach ($horas_disponibles as $hora_opcion):
+                    // Comprobamos si esta hora ya está ocupada
+                    $ocupada = in_array($hora_opcion, $horas_ocupadas);
                 ?>
                 <option value="<?= $hora_opcion ?>"
+                    <?= $ocupada ? 'disabled style="color:#444"' : '' ?>
                     <?= (isset($_POST['hora']) && $_POST['hora'] === $hora_opcion) ? 'selected' : '' ?>>
-                    <?= $hora_opcion ?>
+                    <?= $hora_opcion ?> <?= $ocupada ? '— Ocupado' : '' ?>
                 </option>
                 <?php endforeach; ?>
             </select>
+            <!-- Aviso de horas ocupadas -->
+            <p style="font-size:10px; color:var(--blanco-suave);
+                      letter-spacing:1px; margin-top:6px;">
+                Las horas marcadas como ocupadas no están disponibles
+            </p>
         </div>
 
         <!-- Notas opcionales -->
