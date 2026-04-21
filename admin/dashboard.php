@@ -64,7 +64,112 @@ $reservas = $conexion->query(
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
 
-<!-- Contenido del dashboard irá aquí -->
+<!-- ================================================
+     PANEL PRINCIPAL DE ADMINISTRACIÓN
+     ================================================ -->
+<div class="admin-layout">
+
+    <!-- Barra lateral del panel -->
+    <aside class="admin-sidebar">
+        <div class="logo-admin">Dioni</div>
+
+        <ul>
+            <li><a href="dashboard.php" class="activo">Panel</a></li>
+            <li><a href="gestionar.php">Reservas</a></li>
+            <li><a href="../public/index.php">Ver web</a></li>
+        </ul>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="admin-contenido">
+
+        <h1>Panel de administración</h1>
+        <div class="linea-deco"></div>
+
+        <p style="color: var(--blanco-suave); margin-bottom: 35px;">
+            Bienvenido/a, <?= limpiar($admin_nombre) ?>. Este es el resumen general de reservas.
+        </p>
+
+        <!-- Tarjetas de estadísticas -->
+        <section class="stats-grid">
+
+            <article class="stat-card">
+                <div class="stat-numero"><?= (int) $total_pendientes ?></div>
+                <div class="stat-label">Pendientes</div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-numero"><?= (int) $total_confirmadas ?></div>
+                <div class="stat-label">Confirmadas</div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-numero"><?= (int) $total_clientes ?></div>
+                <div class="stat-label">Clientes</div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-numero"><?= (int) $total_hoy ?></div>
+                <div class="stat-label">Reservas hoy</div>
+            </article>
+
+        </section>
+
+        <!-- Tabla de reservas recientes -->
+        <section>
+            <h2 style="font-size: 22px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 20px;">
+                Últimas reservas
+            </h2>
+
+            <?php if ($reservas && $reservas->num_rows > 0): ?>
+                <table class="tabla-reservas">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
+                            <th>Servicio</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Precio</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <?php while ($reserva = $reservas->fetch_assoc()): ?>
+                            <?php
+                                $estado = strtolower($reserva['estado']);
+                                $fecha_formateada = date('d/m/Y', strtotime($reserva['fecha']));
+                                $hora_formateada = date('H:i', strtotime($reserva['hora']));
+                            ?>
+                            <tr>
+                                <td>
+                                    <?= limpiar($reserva['nombre'] . ' ' . $reserva['apellidos']) ?>
+                                </td>
+                                <td><?= limpiar($reserva['telefono']) ?></td>
+                                <td><?= limpiar($reserva['servicio']) ?></td>
+                                <td><?= limpiar($fecha_formateada) ?></td>
+                                <td><?= limpiar($hora_formateada) ?></td>
+                                <td><?= number_format((float) $reserva['precio'], 2, ',', '.') ?> €</td>
+                                <td>
+                                    <span class="badge badge-<?= limpiar($estado) ?>">
+                                        <?= limpiar($estado) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <div class="aviso aviso-exito">
+                    Todavía no hay reservas registradas.
+                </div>
+            <?php endif; ?>
+        </section>
+
+    </main>
+
+</div>
 
 <?php
 $conexion->close();
