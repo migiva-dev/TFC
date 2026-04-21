@@ -55,3 +55,106 @@ a {
 a:hover {
     color: var(--plateado-claro);
 }
+/* =====================================================
+   CABECERA / NAVEGACIÓN
+   ===================================================== */
+header {
+    background-color: var(--negro);
+    border-bottom: 1px solid var(--negro-borde);
+    padding: 0 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 70px;
+}
+
+/* Logo DIONI en la navegación */
+.logo {
+    font-family: var(--fuente-titulo);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 8px;
+    color: var(--plateado);
+    text-transform: uppercase;
+}
+
+.logo:hover {
+    color: var(--plateado-claro);
+}
+
+/* Menú de navegación */
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 40px;
+    align-items: center;
+}
+
+.nav-links a {
+    font-family: var(--fuente-cuerpo);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blanco-suave);
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--plateado);
+}
+
+/* Botón especial Reservar en el nav */
+.nav-links .btn-nav {
+    border: 1px solid var(--plateado);
+    padding: 8px 20px;
+    color: var(--plateado);
+    letter-spacing: 3px;
+    font-size: 10px;
+}
+
+.nav-links .btn-nav:hover {
+    background-color: var(--plateado);
+    color: var(--negro);
+}
+
+/* =====================================================
+   PIE DE PÁGINA
+   ===================================================== */
+footer {
+    background-color: var(--negro-suave);
+    border-top: 1px solid var(--negro-borde);
+    padding: 50px 40px 30px;
+    text-align: center;
+}
+
+.footer-logo {
+    font-family: var(--fuente-titulo);
+    font-size: 24px;
+    letter-spacing: 8px;
+    color: var(--plateado);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.footer-info {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--blanco-suave);
+    line-height: 2;
+}
+
+.footer-copy {
+    margin-top: 30px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #444;
+    text-transform: uppercase;
+}
