@@ -37,7 +37,7 @@ $error  = '';
 $exito  = '';
 
 // -- Obtenemos las horas ocupadas para la fecha seleccionada --
-// Se usa en JavaScript para deshabilitar horas en el selector
+// Se usa para deshabilitar horas ya reservadas en el selector
 $fecha_consulta = $_POST['fecha'] ?? date('Y-m-d');
 $horas_ocupadas = [];
 
@@ -54,73 +54,80 @@ while ($fila = $resultado_horas->fetch_assoc()) {
 }
 $stmt->close();
 
-
-
 // -------------------------------------------------------
 // Procesamos el formulario cuando se envía (método POST)
 // -------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Recogemos y limpiamos los datos del formulario
-    $servicio_id = intval($_POST['servicio_id'] ?? 0);
-    $fecha       = trim($_POST['fecha']         ?? '');
-    $hora        = trim($_POST['hora']          ?? '');
-    $notas       = trim($_POST['notas']         ?? '');
+    // Si solo es una consulta de horas al cambiar la fecha
+    // no procesamos la reserva, solo actualizamos las horas
+    if (isset($_POST['consultar_horas'])) {
 
-    // -- Validaciones --
-
-    // Todos los campos obligatorios deben estar rellenos
-    if (empty($servicio_id) || empty($fecha) || empty($hora)) {
-        $error = 'Por favor, rellena todos los campos obligatorios.';
-
-    // La fecha no puede ser anterior a hoy
-    } elseif ($fecha < date('Y-m-d')) {
-        $error = 'La fecha no puede ser anterior a hoy.';
-
-    // No se puede reservar en domingo (0 = domingo en PHP)
-    } elseif (date('w', strtotime($fecha)) == 0) {
-        $error = 'Lo sentimos, los domingos estamos cerrados.';
+        // La fecha ya fue consultada arriba, no hacemos nada más
+        // El formulario se mostrará con las horas actualizadas
 
     } else {
 
-        // Comprobamos que no haya ya una reserva para esa fecha y hora
-        $stmt = $conexion->prepare(
-            "SELECT id FROM reservas
-             WHERE fecha = ? AND hora = ?
-             AND estado != 'cancelada'"
-        );
-        $stmt->bind_param('ss', $fecha, $hora);
-        $stmt->execute();
-        $stmt->store_result();
+        // Recogemos y limpiamos los datos del formulario
+        $servicio_id = intval($_POST['servicio_id'] ?? 0);
+        $fecha       = trim($_POST['fecha']         ?? '');
+        $hora        = trim($_POST['hora']          ?? '');
+        $notas       = trim($_POST['notas']         ?? '');
 
-        if ($stmt->num_rows > 0) {
-            // Ya hay una reserva en ese horario
-            $error = 'Ese horario ya está ocupado. Por favor elige otro.';
-            $stmt->close();
+        // -- Validaciones --
+
+        // Todos los campos obligatorios deben estar rellenos
+        if (empty($servicio_id) || empty($fecha) || empty($hora)) {
+            $error = 'Por favor, rellena todos los campos obligatorios.';
+
+        // La fecha no puede ser anterior a hoy
+        } elseif ($fecha < date('Y-m-d')) {
+            $error = 'La fecha no puede ser anterior a hoy.';
+
+        // No se puede reservar en domingo (0 = domingo en PHP)
+        } elseif (date('w', strtotime($fecha)) == 0) {
+            $error = 'Lo sentimos, los domingos estamos cerrados.';
 
         } else {
-            $stmt->close();
 
-            // Insertamos la reserva en la BD con estado 'pendiente'
+            // Comprobamos que no haya ya una reserva para esa fecha y hora
             $stmt = $conexion->prepare(
-                "INSERT INTO reservas (usuario_id, servicio_id, fecha, hora, notas)
-                 VALUES (?, ?, ?, ?, ?)"
+                "SELECT id FROM reservas
+                 WHERE fecha = ? AND hora = ?
+                 AND estado != 'cancelada'"
             );
-            $stmt->bind_param('iisss', $usuario_id, $servicio_id, $fecha, $hora, $notas);
+            $stmt->bind_param('ss', $fecha, $hora);
+            $stmt->execute();
+            $stmt->store_result();
 
-            if ($stmt->execute()) {
-                $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
-                         date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
+            if ($stmt->num_rows > 0) {
+                // Ya hay una reserva en ese horario
+                $error = 'Ese horario ya está ocupado. Por favor elige otro.';
+                $stmt->close();
+
             } else {
-                $error = 'Error al guardar la reserva. Inténtalo de nuevo.';
+                $stmt->close();
+
+                // Insertamos la reserva en la BD con estado 'pendiente'
+                $stmt = $conexion->prepare(
+                    "INSERT INTO reservas (usuario_id, servicio_id, fecha, hora, notas)
+                     VALUES (?, ?, ?, ?, ?)"
+                );
+                $stmt->bind_param('iisss', $usuario_id, $servicio_id, $fecha, $hora, $notas);
+
+                if ($stmt->execute()) {
+                    $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
+                             date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
+                } else {
+                    $error = 'Error al guardar la reserva. Inténtalo de nuevo.';
+                }
+
+                $stmt->close();
             }
-
-            $stmt->close();
         }
-    }
-}
 
-// Incluimos la cabecera común
+    } // fin else consultar_horas
+}
 
 // Incluimos la cabecera común
 require_once '../includes/header.php';
@@ -134,7 +141,7 @@ require_once '../includes/header.php';
     <h2>Reservar cita</h2>
     <div class="linea-deco"></div>
 
-  <!-- Mensaje de bienvenida si acaba de registrarse -->
+    <!-- Mensaje de bienvenida si acaba de registrarse -->
     <?php if (isset($_GET['bienvenido'])): ?>
         <div class="aviso aviso-exito" style="margin-bottom:25px;">
             ¡Bienvenido, <?= limpiar($usuario_nombre) ?>!
@@ -143,7 +150,7 @@ require_once '../includes/header.php';
         </div>
     <?php endif; ?>
 
-    <!-- Saludo personalizado con nombre y apellidos -->
+    <!-- Saludo personalizado con nombre -->
     <div style="text-align:center; margin-bottom:30px;">
         <p style="color:var(--plateado); font-family:var(--fuente-titulo);
                   font-size:20px; letter-spacing:3px;">
@@ -209,7 +216,7 @@ require_once '../includes/header.php';
             </p>
         </div>
 
-     <!-- Hora con horas ocupadas deshabilitadas -->
+        <!-- Hora con horas ocupadas deshabilitadas -->
         <div class="campo-grupo">
             <label for="hora">Hora *</label>
             <select id="hora" name="hora" required>
