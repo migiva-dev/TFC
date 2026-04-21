@@ -616,23 +616,133 @@ footer {
 .badge-cancelada  { color: #ff6b6b; border-color: #ff6b6b; }
 
 /* =====================================================
-   RESPONSIVE — Adaptación a móviles
+   RESPONSIVE — Adaptación a móviles 
    ===================================================== */
+
+/* -- Tablets (hasta 1024px) -- */
+@media (max-width: 1024px) {
+    .servicios-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* -- Móviles (hasta 768px) -- */
 @media (max-width: 768px) {
 
-    header { padding: 0 20px; }
+    /* Cabecera */
+    header { padding: 0 15px; }
 
-    .nav-links { gap: 20px; }
-    .nav-links a { font-size: 9px; letter-spacing: 2px; }
+    /* Ocultamos el menú normal en móvil */
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background-color: var(--negro);
+        border-bottom: 1px solid var(--negro-borde);
+        padding: 20px 0;
+        gap: 0;
+        z-index: 99;
+    }
 
-    .hero h1 { letter-spacing: 6px; }
+    /* Cuando el menú está abierto lo mostramos */
+    .nav-links.abierto {
+        display: flex;
+    }
 
-    .seccion { padding: 60px 20px; }
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
 
-    .formulario-contenedor { margin: 30px 20px; padding: 35px 25px; }
+    .nav-links a {
+        display: block;
+        padding: 15px 20px;
+        font-size: 11px;
+        letter-spacing: 3px;
+        border-bottom: 1px solid var(--negro-borde);
+    }
 
-    /* El panel admin se apila verticalmente en móvil */
+    .nav-links .btn-nav {
+        margin: 15px 30px;
+        display: block;
+        text-align: center;
+    }
+
+    /* Botón hamburguesa */
+    .menu-hamburguesa {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+        padding: 10px;
+        background: none;
+        border: none;
+    }
+
+    .menu-hamburguesa span {
+        display: block;
+        width: 24px;
+        height: 1px;
+        background-color: var(--plateado);
+        transition: all 0.3s ease;
+    }
+
+    /* Hero */
+    .hero { min-height: 70vh; padding: 40px 20px; }
+    .hero h1 { font-size: 40px; letter-spacing: 6px; }
+    .hero-subtitulo { font-size: 9px; letter-spacing: 3px; }
+
+    /* Botones hero en columna */
+    .hero-contenido .btn-principal,
+    .hero-contenido .btn-secundario {
+        display: block;
+        margin: 10px auto;
+        max-width: 220px;
+        text-align: center;
+    }
+
+    /* Secciones */
+    .seccion { padding: 50px 20px; }
+    .seccion-titulo h2 { letter-spacing: 5px; }
+
+    /* Servicios en columna */
+    .servicios-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Formularios */
+    .formulario-contenedor {
+        margin: 20px 15px;
+        padding: 30px 20px;
+    }
+
+    /* Panel admin en columna */
     .admin-layout { flex-direction: column; }
     .admin-sidebar { width: 100%; padding: 20px 0; }
-    .admin-contenido { padding: 30px 20px; }
+    .admin-contenido { padding: 25px 15px; }
+
+    /* Tabla admin con scroll horizontal */
+    .tabla-reservas { font-size: 11px; }
+    .tabla-reservas th,
+    .tabla-reservas td { padding: 10px 8px; }
+
+    /* Stats en 2 columnas */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+}
+
+/* -- Móviles pequeños (hasta 400px) -- */
+@media (max-width: 400px) {
+    .hero h1 { font-size: 32px; letter-spacing: 4px; }
+    .logo img { height: 35px; }
+    .stats-grid { grid-template-columns: 1fr; }
 }
