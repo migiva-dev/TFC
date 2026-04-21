@@ -65,107 +65,167 @@ require_once dirname(__DIR__) . '/includes/header.php';
 ?>
 
 <!-- ================================================
-     PANEL PRINCIPAL DE ADMINISTRACIÓN
+     LAYOUT DEL PANEL DE ADMINISTRACIÓN
      ================================================ -->
 <div class="admin-layout">
 
-    <!-- Barra lateral del panel -->
+    <!-- ============================================
+         SIDEBAR — Menú lateral izquierdo
+         ============================================ -->
     <aside class="admin-sidebar">
+
+        <!-- Logo en el sidebar -->
         <div class="logo-admin">Dioni</div>
 
+        <!-- Menú de navegación del panel -->
         <ul>
-            <li><a href="dashboard.php" class="activo">Panel</a></li>
-            <li><a href="gestionar.php">Reservas</a></li>
-            <li><a href="../public/index.php">Ver web</a></li>
+            <li>
+                <a href="dashboard.php" class="activo">
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="gestionar.php">
+                    Reservas
+                </a>
+            </li>
+            <li>
+                <!-- Cerrar sesión del administrador -->
+                <a href="logout.php">
+                    Cerrar sesión
+                </a>
+            </li>
         </ul>
+
     </aside>
 
-    <!-- Contenido principal -->
+    <!-- ============================================
+         CONTENIDO PRINCIPAL DEL DASHBOARD
+         ============================================ -->
     <main class="admin-contenido">
 
-        <h1>Panel de administración</h1>
+        <!-- Saludo con el nombre del admin -->
+        <h1>Bienvenido, <?= limpiar($admin_nombre) ?></h1>
         <div class="linea-deco"></div>
 
-        <p style="color: var(--blanco-suave); margin-bottom: 35px;">
-            Bienvenido/a, <?= limpiar($admin_nombre) ?>. Este es el resumen general de reservas.
-        </p>
+        <!-- ----------------------------------------
+             TARJETAS DE ESTADÍSTICAS
+             ---------------------------------------- -->
+        <div class="stats-grid">
 
-        <!-- Tarjetas de estadísticas -->
-        <section class="stats-grid">
-
-            <article class="stat-card">
-                <div class="stat-numero"><?= (int) $total_pendientes ?></div>
+            <!-- Reservas pendientes -->
+            <div class="stat-card">
+                <div class="stat-numero"><?= $total_pendientes ?></div>
                 <div class="stat-label">Pendientes</div>
-            </article>
+            </div>
 
-            <article class="stat-card">
-                <div class="stat-numero"><?= (int) $total_confirmadas ?></div>
+            <!-- Reservas confirmadas -->
+            <div class="stat-card">
+                <div class="stat-numero"><?= $total_confirmadas ?></div>
                 <div class="stat-label">Confirmadas</div>
-            </article>
+            </div>
 
-            <article class="stat-card">
-                <div class="stat-numero"><?= (int) $total_clientes ?></div>
+            <!-- Citas de hoy -->
+            <div class="stat-card">
+                <div class="stat-numero"><?= $total_hoy ?></div>
+                <div class="stat-label">Citas hoy</div>
+            </div>
+
+            <!-- Total de clientes registrados -->
+            <div class="stat-card">
+                <div class="stat-numero"><?= $total_clientes ?></div>
                 <div class="stat-label">Clientes</div>
-            </article>
+            </div>
 
-            <article class="stat-card">
-                <div class="stat-numero"><?= (int) $total_hoy ?></div>
-                <div class="stat-label">Reservas hoy</div>
-            </article>
+        </div>
 
-        </section>
+        <!-- ----------------------------------------
+             TABLA DE RESERVAS RECIENTES
+             ---------------------------------------- -->
+        <h2 style="font-size:20px; letter-spacing:4px;
+                   text-transform:uppercase; margin-bottom:10px;">
+            Próximas reservas
+        </h2>
+        <div class="linea-deco" style="margin-bottom:30px;"></div>
 
-        <!-- Tabla de reservas recientes -->
-        <section>
-            <h2 style="font-size: 22px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 20px;">
-                Últimas reservas
-            </h2>
+        <?php if ($reservas && $reservas->num_rows > 0): ?>
+        <div style="overflow-x:auto;">
+            <table class="tabla-reservas">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Teléfono</th>
+                        <th>Servicio</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($r = $reservas->fetch_assoc()): ?>
+                    <tr>
+                        <!-- ID de la reserva -->
+                        <td><?= $r['id'] ?></td>
 
-            <?php if ($reservas && $reservas->num_rows > 0): ?>
-                <table class="tabla-reservas">
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Teléfono</th>
-                            <th>Servicio</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Precio</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
+                        <!-- Nombre completo del cliente -->
+                        <td><?= limpiar($r['nombre']) . ' ' . limpiar($r['apellidos']) ?></td>
 
-                    <tbody>
-                        <?php while ($reserva = $reservas->fetch_assoc()): ?>
-                            <?php
-                                $estado = strtolower($reserva['estado']);
-                                $fecha_formateada = date('d/m/Y', strtotime($reserva['fecha']));
-                                $hora_formateada = date('H:i', strtotime($reserva['hora']));
-                            ?>
-                            <tr>
-                                <td>
-                                    <?= limpiar($reserva['nombre'] . ' ' . $reserva['apellidos']) ?>
-                                </td>
-                                <td><?= limpiar($reserva['telefono']) ?></td>
-                                <td><?= limpiar($reserva['servicio']) ?></td>
-                                <td><?= limpiar($fecha_formateada) ?></td>
-                                <td><?= limpiar($hora_formateada) ?></td>
-                                <td><?= number_format((float) $reserva['precio'], 2, ',', '.') ?> €</td>
-                                <td>
-                                    <span class="badge badge-<?= limpiar($estado) ?>">
-                                        <?= limpiar($estado) ?>
-                                    </span>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <div class="aviso aviso-exito">
-                    Todavía no hay reservas registradas.
-                </div>
-            <?php endif; ?>
-        </section>
+                        <!-- Teléfono del cliente -->
+                        <td><?= limpiar($r['telefono']) ?></td>
+
+                        <!-- Servicio reservado -->
+                        <td><?= limpiar($r['servicio']) ?></td>
+
+                        <!-- Fecha formateada en español -->
+                        <td><?= date('d/m/Y', strtotime($r['fecha'])) ?></td>
+
+                        <!-- Hora -->
+                        <td><?= limpiar($r['hora']) ?></td>
+
+                        <!-- Badge de estado coloreado -->
+                        <td>
+                            <span class="badge badge-<?= $r['estado'] ?>">
+                                <?= ucfirst($r['estado']) ?>
+                            </span>
+                        </td>
+
+                        <!-- Botones de acción -->
+                        <td>
+                            <a href="gestionar.php?accion=confirmar&id=<?= $r['id'] ?>"
+                               class="btn-principal"
+                               style="font-size:9px; padding:6px 14px; margin-right:5px;">
+                                Confirmar
+                            </a>
+                            <a href="gestionar.php?accion=cancelar&id=<?= $r['id'] ?>"
+                               class="btn-form"
+                               style="font-size:9px; padding:6px 14px;
+                                      display:inline-block; width:auto;
+                                      color:#ff6b6b; border-color:#ff6b6b;">
+                                Cancelar
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Enlace para ver y gestionar todas las reservas -->
+        <div style="text-align:right; margin-top:20px;">
+            <a href="gestionar.php" class="btn-principal"
+               style="font-size:9px; padding:10px 24px;">
+                Ver todas las reservas
+            </a>
+        </div>
+
+        <?php else: ?>
+            <!-- Mensaje si no hay reservas todavía -->
+            <p style="color:var(--blanco-suave); font-size:13px; letter-spacing:1px;">
+                No hay reservas registradas todavía.
+            </p>
+        <?php endif; ?>
 
     </main>
 
