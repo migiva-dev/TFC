@@ -10,10 +10,12 @@
      PIE DE PÁGINA
      ================================================ -->
 <footer>
-    <!-- Logo en el pie enlazado a la página principal -->
-    <a href="<?= SITIO_URL ?>/index.php" class="footer-logo"
-       style="display:block; text-decoration:none;">
-        Dioni
+   
+    <!-- Logo imagen en el pie enlazado a la página principal -->
+    <a href="<?= SITIO_URL ?>/index.php" style="display:block;">
+        <img src="http://tfc-peluqueria.atwebpages.com/assets/img/logo.png"
+             alt="Dioni Peluqueros"
+             style="height:55px; width:auto; margin-bottom:20px;">
     </a>
 
     <!-- Información de contacto de la peluquería -->
