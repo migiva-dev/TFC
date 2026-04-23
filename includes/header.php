@@ -26,8 +26,12 @@ iniciar_sesion();
 <header>
     <nav>
 
-        <!-- Logo de la peluquería -->
-        <a href="<?= SITIO_URL ?>/index.php" class="logo">Dioni</a>
+       <!-- Logo de la peluquería como imagen -->
+        <a href="<?= SITIO_URL ?>/index.php" class="logo">
+            <img src="http://tfc-peluqueria.atwebpages.com/assets/img/logo.png"
+                 alt="Dioni Peluqueros"
+                 style="height:45px; width:auto;">
+        </a>
 
         <!-- Botón hamburguesa visible solo en móvil -->
         <button class="menu-hamburguesa" aria-label="Abrir menú">
