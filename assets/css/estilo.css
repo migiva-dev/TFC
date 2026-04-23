@@ -738,9 +738,26 @@ footer {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
-}
+    }
+    /* =====================================================
+    LOGO IMAGEN — Integración con el fondo negro
+    ===================================================== */
 
-/* -- Móviles pequeños (hasta 400px) -- */
+    /* El mix-blend-mode screen hace que el negro del logo
+    sea transparente y solo se vean las letras plateadas */
+    .logo img {
+        height: 45px;
+        width: auto;
+        mix-blend-mode: screen;
+        filter: brightness(1.1);
+    }
+
+    /* Logo en el footer también */
+    footer img {
+        mix-blend-mode: screen;
+        filter: brightness(1.1);
+    }
+    /* -- Móviles pequeños (hasta 400px) -- */
 @media (max-width: 400px) {
     .hero h1 { font-size: 32px; letter-spacing: 4px; }
     .logo img { height: 35px; }
