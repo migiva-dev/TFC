@@ -10,8 +10,11 @@
      PIE DE PÁGINA
      ================================================ -->
 <footer>
-    <!-- Logo en el pie -->
-    <div class="footer-logo">Dioni</div>
+    <!-- Logo en el pie enlazado a la página principal -->
+    <a href="<?= SITIO_URL ?>/index.php" class="footer-logo"
+       style="display:block; text-decoration:none;">
+        Dioni
+    </a>
 
     <!-- Información de contacto de la peluquería -->
     <div class="footer-info">
