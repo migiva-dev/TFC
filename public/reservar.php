@@ -88,6 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (date('w', strtotime($fecha)) == 0) {
             $error = 'Lo sentimos, los domingos estamos cerrados.';
 
+        // Comprobamos que la hora no esté ya ocupada
+        // Seguridad extra: aunque el select esté deshabilitado
+        // alguien podría enviar el formulario manualmente
+        } elseif (in_array($hora, $horas_ocupadas)) {
+            $error = 'Esa hora ya está ocupada. Por favor elige otra.';
+
         } else {
 
             // Comprobamos que no haya ya una reserva para esa fecha y hora
