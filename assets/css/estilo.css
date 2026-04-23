@@ -55,6 +55,7 @@ a {
 a:hover {
     color: var(--plateado-claro);
 }
+
 /* =====================================================
    CABECERA / NAVEGACIÓN
    ===================================================== */
@@ -88,6 +89,22 @@ nav {
 
 .logo:hover {
     color: var(--plateado-claro);
+}
+
+/* =====================================================
+   LOGO IMAGEN — Fondo transparente PNG
+   ===================================================== */
+
+/* Logo en el header */
+.logo img {
+    height: 45px;
+    width: auto;
+}
+
+/* Logo en el footer */
+footer img {
+    height: 55px;
+    width: auto;
 }
 
 /* Menú de navegación */
@@ -125,6 +142,9 @@ nav {
     color: var(--negro);
 }
 
+/* Ocultamos el botón hamburguesa en escritorio */
+.menu-hamburguesa { display: none; }
+
 /* =====================================================
    PIE DE PÁGINA
    ===================================================== */
@@ -158,6 +178,7 @@ footer {
     color: #444;
     text-transform: uppercase;
 }
+
 /* =====================================================
    HERO - Sección principal de inicio
    ===================================================== */
@@ -616,7 +637,7 @@ footer {
 .badge-cancelada  { color: #ff6b6b; border-color: #ff6b6b; }
 
 /* =====================================================
-   RESPONSIVE — Adaptación a móviles 
+   RESPONSIVE — Adaptación a móviles y tablets
    ===================================================== */
 
 /* -- Tablets (hasta 1024px) -- */
@@ -675,7 +696,7 @@ footer {
         text-align: center;
     }
 
-    /* Botón hamburguesa */
+    /* Botón hamburguesa visible solo en móvil */
     .menu-hamburguesa {
         display: flex;
         flex-direction: column;
@@ -738,26 +759,9 @@ footer {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
-    }
-    /* =====================================================
-    LOGO IMAGEN — Integración con el fondo negro
-    ===================================================== */
+}
 
-    /* El mix-blend-mode screen hace que el negro del logo
-    sea transparente y solo se vean las letras plateadas */
-    .logo img {
-        height: 45px;
-        width: auto;
-        mix-blend-mode: screen;
-        filter: brightness(1.1);
-    }
-
-    /* Logo en el footer también */
-    footer img {
-        mix-blend-mode: screen;
-        filter: brightness(1.1);
-    }
-    /* -- Móviles pequeños (hasta 400px) -- */
+/* -- Móviles pequeños (hasta 400px) -- */
 @media (max-width: 400px) {
     .hero h1 { font-size: 32px; letter-spacing: 4px; }
     .logo img { height: 35px; }
