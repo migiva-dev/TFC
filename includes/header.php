@@ -15,8 +15,8 @@ iniciar_sesion();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($titulo_pagina) ? limpiar($titulo_pagina) . ' — ' . SITIO_NOMBRE : SITIO_NOMBRE ?></title>
 
-    <!-- Ruta absoluta al CSS para que funcione en AwardSpace -->
-    <link rel="stylesheet" href="http://tfc-peluqueria.atwebpages.com/assets/css/estilo.css">
+    <!-- Ruta absoluta con HTTPS al CSS -->
+    <link rel="stylesheet" href="https://tfc-peluqueria.atwebpages.com/assets/css/estilo.css">
 </head>
 <body>
 
@@ -26,9 +26,9 @@ iniciar_sesion();
 <header>
     <nav>
 
-       <!-- Logo de la peluquería como imagen -->
+        <!-- Logo de la peluquería como imagen -->
         <a href="<?= SITIO_URL ?>/index.php" class="logo">
-            <img src="http://tfc-peluqueria.atwebpages.com/assets/img/logo.png"
+            <img src="https://tfc-peluqueria.atwebpages.com/assets/img/logo.png"
                  alt="Dioni Peluqueros"
                  style="height:45px; width:auto;">
         </a>
