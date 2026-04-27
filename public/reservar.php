@@ -36,6 +36,45 @@ for ($h = 9; $h < 20; $h++) {
 $error  = '';
 $exito  = '';
 
+// -------------------------------------------------------
+// Calculamos la disponibilidad de cada día del mes
+// para mostrarla en el calendario con colores
+// -------------------------------------------------------
+
+// Total de horas disponibles por día (de 9:00 a 19:30 cada 30min)
+$total_horas_dia = 22; // 22 franjas horarias disponibles
+
+// Mes y año que se está viendo en el calendario
+// Por defecto el mes actual
+$mes_actual  = intval($_GET['mes']  ?? date('n'));
+$anio_actual = intval($_GET['anio'] ?? date('Y'));
+
+// Nos aseguramos de que el mes esté entre 1 y 12
+if ($mes_actual < 1)  { $mes_actual = 12; $anio_actual--; }
+if ($mes_actual > 12) { $mes_actual = 1;  $anio_actual++; }
+
+// Consultamos cuántas reservas hay por día en ese mes
+$stmt = $conexion->prepare(
+    "SELECT fecha, COUNT(*) as total
+     FROM reservas
+     WHERE MONTH(fecha) = ? AND YEAR(fecha) = ?
+     AND estado != 'cancelada'
+     GROUP BY fecha"
+);
+$stmt->bind_param('ii', $mes_actual, $anio_actual);
+$stmt->execute();
+$resultado_mes = $stmt->get_result();
+
+// Guardamos las reservas por día en un array
+// clave = día del mes, valor = número de reservas
+$reservas_por_dia = [];
+while ($fila = $resultado_mes->fetch_assoc()) {
+    $dia = intval(date('j', strtotime($fila['fecha'])));
+    $reservas_por_dia[$dia] = intval($fila['total']);
+}
+$stmt->close();
+
+
 // -- Obtenemos las horas ocupadas para la fecha seleccionada --
 // Se usa para deshabilitar horas ya reservadas en el selector
 $fecha_consulta = $_POST['fecha'] ?? date('Y-m-d');
