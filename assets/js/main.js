@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (texto) {
             // Formateamos la fecha de YYYY-MM-DD a DD/MM/YYYY
             const partes = fecha.split('-');
-            texto.textContent = ' ' + partes[2] + '/' + partes[1] + '/' + partes[0];
+            texto.textContent = '🗓️' + partes[2] + '/' + partes[1] + '/' + partes[0];
         }
 
         // Quitamos la clase seleccionado de todos los días
