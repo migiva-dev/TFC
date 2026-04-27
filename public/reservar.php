@@ -246,18 +246,154 @@ require_once '../includes/header.php';
             </select>
         </div>
 
-        <!-- Fecha con calendario visual -->
+       <!-- Fecha con calendario visual por colores -->
         <div class="campo-grupo">
-            <label for="fecha">Fecha *</label>
-            <input type="date" id="fecha" name="fecha"
-                   min="<?= date('Y-m-d') ?>"
-                   value="<?= limpiar($_POST['fecha'] ?? '') ?>"
-                   style="cursor:pointer;"
-                   required>
-            <!-- Aviso de días cerrados -->
-            <p style="font-size:10px; color:var(--blanco-suave);
-                      letter-spacing:1px; margin-top:6px;">
-                🗓 Abrimos de lunes a sábado
+            <label>Fecha *</label>
+
+            <!-- Calendario visual -->
+            <div class="calendario">
+
+                <!-- Cabecera con mes, año y flechas de navegación -->
+                <div class="calendario-header">
+                    <!-- Flecha mes anterior -->
+                    <a href="reservar.php?mes=<?= $mes_actual - 1 ?>&anio=<?= $anio_actual ?>"
+                       class="calendario-nav">&#8592;</a>
+
+                    <!-- Nombre del mes y año -->
+                    <h3>
+                        <?php
+                        // Nombres de los meses en español
+                        $meses = [
+                            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo',
+                            4 => 'Abril', 5 => 'Mayo', 6 => 'Junio',
+                            7 => 'Julio', 8 => 'Agosto', 9 => 'Septiembre',
+                            10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+                        ];
+                        echo $meses[$mes_actual] . ' ' . $anio_actual;
+                        ?>
+                    </h3>
+
+                    <!-- Flecha mes siguiente -->
+                    <a href="reservar.php?mes=<?= $mes_actual + 1 ?>&anio=<?= $anio_actual ?>"
+                       class="calendario-nav">&#8594;</a>
+                </div>
+
+                <!-- Días de la semana -->
+                <div class="calendario-dias-semana">
+                    <span>Lun</span>
+                    <span>Mar</span>
+                    <span>Mié</span>
+                    <span>Jue</span>
+                    <span>Vie</span>
+                    <span>Sáb</span>
+                    <span>Dom</span>
+                </div>
+
+                <!-- Grid de días del mes -->
+                <div class="calendario-grid">
+                    <?php
+                    // Primer día del mes (1=lunes...7=domingo en ISO)
+                    $primer_dia    = date('N', mktime(0, 0, 0, $mes_actual, 1, $anio_actual));
+                    // Total de días del mes
+                    $dias_en_mes   = date('t', mktime(0, 0, 0, $mes_actual, 1, $anio_actual));
+                    // Fecha de hoy para comparar
+                    $hoy           = date('Y-m-d');
+
+                    // Celdas vacías antes del primer día
+                    for ($i = 1; $i < $primer_dia; $i++) {
+                        echo '<div class="calendario-dia vacio"></div>';
+                    }
+
+                    // Recorremos cada día del mes
+                    for ($dia = 1; $dia <= $dias_en_mes; $dia++) {
+
+                        // Fecha completa de este día
+                        $fecha_dia = sprintf('%04d-%02d-%02d', $anio_actual, $mes_actual, $dia);
+
+                        // Día de la semana (0=domingo, 6=sábado)
+                        $dia_semana = date('w', strtotime($fecha_dia));
+
+                        // Determinamos la clase CSS según disponibilidad
+                        if ($fecha_dia < $hoy) {
+                            // Día pasado
+                            $clase = 'pasado';
+                        } elseif ($dia_semana == 0) {
+                            // Domingo: cerrado
+                            $clase = 'domingo';
+                        } else {
+                            // Calculamos reservas y disponibilidad
+                            $reservas_hoy = $reservas_por_dia[$dia] ?? 0;
+                            $porcentaje   = ($reservas_hoy / $total_horas_dia) * 100;
+
+                            if ($porcentaje >= 100) {
+                                $clase = 'completo';       // Rojo: lleno
+                            } elseif ($porcentaje >= 70) {
+                                $clase = 'disponible-poco'; // Naranja: pocas horas
+                            } elseif ($porcentaje >= 40) {
+                                $clase = 'disponible-medio'; // Amarillo: algunas horas
+                            } else {
+                                $clase = 'disponible-alto';  // Verde: muchas horas
+                            }
+                        }
+
+                        // Si este día está seleccionado lo marcamos
+                        $fecha_seleccionada = $_POST['fecha'] ?? $_GET['fecha'] ?? '';
+                        if ($fecha_dia === $fecha_seleccionada) {
+                            $clase .= ' seleccionado';
+                        }
+
+                        // Pintamos el día
+                        // Si se puede seleccionar añadimos data-fecha
+                        if (!in_array($clase, ['pasado', 'domingo', 'completo'])) {
+                            echo "<div class=\"calendario-dia {$clase}\"
+                                       data-fecha=\"{$fecha_dia}\"
+                                       onclick=\"seleccionarFecha('{$fecha_dia}')\">{$dia}</div>";
+                        } else {
+                            echo "<div class=\"calendario-dia {$clase}\">{$dia}</div>";
+                        }
+                    }
+                    ?>
+                </div>
+
+                <!-- Leyenda de colores -->
+                <div class="calendario-leyenda">
+                    <div class="leyenda-item">
+                        <div class="leyenda-punto verde"></div>
+                        <span>Disponible</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <div class="leyenda-punto amarillo"></div>
+                        <span>Algunas horas</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <div class="leyenda-punto naranja"></div>
+                        <span>Pocas horas</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <div class="leyenda-punto rojo"></div>
+                        <span>Completo</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Campo oculto que guarda la fecha seleccionada -->
+            <!-- Se rellena con JavaScript al pulsar un día -->
+            <input type="hidden" id="fecha" name="fecha"
+                   value="<?= limpiar($_POST['fecha'] ?? $_GET['fecha'] ?? '') ?>">
+
+            <!-- Muestra la fecha seleccionada en texto -->
+            <p id="fecha-seleccionada-texto"
+               style="font-size:10px; color:var(--plateado);
+                      letter-spacing:2px; margin-top:8px; text-align:center;">
+                <?php
+                $fecha_sel = $_POST['fecha'] ?? $_GET['fecha'] ?? '';
+                if (!empty($fecha_sel)) {
+                    echo '📅 ' . date('d/m/Y', strtotime($fecha_sel));
+                } else {
+                    echo '🗓 Selecciona un día del calendario';
+                }
+                ?>
             </p>
         </div>
 
