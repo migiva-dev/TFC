@@ -59,13 +59,34 @@ a:hover {
 /* =====================================================
    CABECERA / NAVEGACIÓN
    ===================================================== */
+
+/* Header blanco por defecto, se vuelve transparente al hacer scroll */
 header {
-    background-color: var(--negro);
-    border-bottom: 1px solid var(--negro-borde);
+    background-color: #ffffff;
+    border-bottom: 1px solid #e8e8e8;
     padding: 0 40px;
     position: sticky;
     top: 0;
     z-index: 100;
+    transition: background-color 0.4s ease,
+                border-color 0.4s ease,
+                box-shadow 0.4s ease;
+}
+
+/* Clase que se añade con JS cuando se hace scroll hacia abajo */
+header.transparente {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(232, 232, 232, 0.3);
+    backdrop-filter: blur(10px);           /* Efecto cristal esmerilado */
+    -webkit-backdrop-filter: blur(10px);   /* Compatibilidad con Safari */
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Cuando estamos arriba del todo sin scroll */
+header.en-top {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
 }
 
 nav {
@@ -103,7 +124,7 @@ nav {
 
 /* Logo en el footer */
 footer img {
-    height: 55px;
+    height: 45px;
     width: auto;
 }
 
@@ -120,12 +141,21 @@ footer img {
     font-size: 11px;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--blanco-suave);
+    color: #333333;                        /* Texto oscuro sobre fondo blanco */
     transition: color 0.3s ease;
 }
 
 .nav-links a:hover {
     color: var(--plateado);
+}
+
+/* Cuando el header es transparente los enlaces son blancos */
+header.en-top .nav-links a {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+header.en-top .nav-links a:hover {
+    color: var(--plateado-claro);
 }
 
 /* Botón especial Reservar en el nav */
@@ -142,6 +172,12 @@ footer img {
     color: var(--negro);
 }
 
+/* Cuando el header es transparente el botón reservar es blanco */
+header.en-top .nav-links .btn-nav {
+    border-color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.9);
+}
+
 /* Ocultamos el botón hamburguesa en escritorio */
 .menu-hamburguesa { display: none; }
 
@@ -149,10 +185,51 @@ footer img {
    PIE DE PÁGINA
    ===================================================== */
 footer {
-    background-color: var(--negro-suave);
+    background-color: #111111;
     border-top: 1px solid var(--negro-borde);
-    padding: 50px 40px 30px;
+    padding: 60px 40px 30px;
     text-align: center;
+}
+
+/* Grid del footer con 3 columnas */
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    max-width: 1000px;
+    margin: 0 auto 40px;
+    text-align: left;
+}
+
+.footer-col h4 {
+    font-family: var(--fuente-titulo);
+    font-size: 14px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--plateado);
+    margin-bottom: 20px;
+}
+
+.footer-col p,
+.footer-col a {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--blanco-suave);
+    line-height: 2.2;
+    display: block;
+}
+
+.footer-col a:hover {
+    color: var(--plateado);
+}
+
+/* Línea separadora */
+.footer-divider {
+    width: 100%;
+    height: 1px;
+    background-color: var(--negro-borde);
+    max-width: 1000px;
+    margin: 0 auto 30px;
 }
 
 .footer-logo {
@@ -172,7 +249,7 @@ footer {
 }
 
 .footer-copy {
-    margin-top: 30px;
+    margin-top: 20px;
     font-size: 10px;
     letter-spacing: 2px;
     color: #444;
@@ -665,8 +742,8 @@ footer {
         top: 70px;
         left: 0;
         right: 0;
-        background-color: var(--negro);
-        border-bottom: 1px solid var(--negro-borde);
+        background-color: #ffffff;
+        border-bottom: 1px solid #e8e8e8;
         padding: 20px 0;
         gap: 0;
         z-index: 99;
@@ -687,7 +764,8 @@ footer {
         padding: 15px 20px;
         font-size: 11px;
         letter-spacing: 3px;
-        border-bottom: 1px solid var(--negro-borde);
+        color: #333333;
+        border-bottom: 1px solid #e8e8e8;
     }
 
     .nav-links .btn-nav {
@@ -711,7 +789,7 @@ footer {
         display: block;
         width: 24px;
         height: 1px;
-        background-color: var(--plateado);
+        background-color: #333333;        /* Oscuro sobre fondo blanco */
         transition: all 0.3s ease;
     }
 
@@ -758,6 +836,13 @@ footer {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
+    }
+
+    /* Footer en columna en móvil */
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        text-align: center;
     }
 }
 
