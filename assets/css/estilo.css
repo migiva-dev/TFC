@@ -77,8 +77,8 @@ header {
 header.transparente {
     background-color: rgba(255, 255, 255, 0.85);
     border-bottom: 1px solid rgba(232, 232, 232, 0.3);
-    backdrop-filter: blur(10px);           /* Efecto cristal esmerilado */
-    -webkit-backdrop-filter: blur(10px);   /* Compatibilidad con Safari */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
 }
 
@@ -141,7 +141,7 @@ footer img {
     font-size: 11px;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: #333333;                        /* Texto oscuro sobre fondo blanco */
+    color: #333333;
     transition: color 0.3s ease;
 }
 
@@ -714,6 +714,187 @@ footer {
 .badge-cancelada  { color: #ff6b6b; border-color: #ff6b6b; }
 
 /* =====================================================
+   CALENDARIO VISUAL DE RESERVAS
+   ===================================================== */
+
+/* Contenedor principal del calendario */
+.calendario {
+    width: 100%;
+    margin-bottom: 25px;
+    background-color: var(--negro);
+    border: 1px solid var(--negro-borde);
+    padding: 20px;
+}
+
+/* Cabecera del calendario con mes y flechas */
+.calendario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendario-header h3 {
+    font-family: var(--fuente-titulo);
+    font-size: 18px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--plateado);
+    font-weight: 400;
+}
+
+/* Botones de navegación del mes */
+.calendario-nav {
+    background: none;
+    border: 1px solid var(--negro-borde);
+    color: var(--plateado);
+    cursor: pointer;
+    padding: 6px 12px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.calendario-nav:hover {
+    border-color: var(--plateado);
+    background-color: rgba(192, 192, 192, 0.1);
+}
+
+/* Grid de días de la semana */
+.calendario-dias-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 8px;
+}
+
+.calendario-dias-semana span {
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blanco-suave);
+    padding: 5px 0;
+}
+
+/* Grid de días del mes */
+.calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+/* Cada día del calendario */
+.calendario-dia {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-family: var(--fuente-cuerpo);
+    font-weight: 300;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    position: relative;
+    border-radius: 2px;
+}
+
+/* Día vacío (relleno del inicio del mes) */
+.calendario-dia.vacio {
+    cursor: default;
+}
+
+/* Día pasado — no se puede seleccionar */
+.calendario-dia.pasado {
+    color: #333333;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* Domingo — cerrado */
+.calendario-dia.domingo {
+    color: #333333;
+    cursor: not-allowed;
+}
+
+/* Día disponible — verde (muchas horas libres) */
+.calendario-dia.disponible-alto {
+    color: #4caf50;
+    border-color: rgba(76, 175, 80, 0.2);
+}
+
+.calendario-dia.disponible-alto:hover {
+    background-color: rgba(76, 175, 80, 0.15);
+    border-color: #4caf50;
+}
+
+/* Día con pocas horas — amarillo */
+.calendario-dia.disponible-medio {
+    color: #f0c040;
+    border-color: rgba(240, 192, 64, 0.2);
+}
+
+.calendario-dia.disponible-medio:hover {
+    background-color: rgba(240, 192, 64, 0.15);
+    border-color: #f0c040;
+}
+
+/* Día casi lleno — naranja */
+.calendario-dia.disponible-poco {
+    color: #ff9800;
+    border-color: rgba(255, 152, 0, 0.2);
+}
+
+.calendario-dia.disponible-poco:hover {
+    background-color: rgba(255, 152, 0, 0.15);
+    border-color: #ff9800;
+}
+
+/* Día completo — rojo, no se puede seleccionar */
+.calendario-dia.completo {
+    color: #ff4444;
+    cursor: not-allowed;
+    border-color: rgba(255, 68, 68, 0.1);
+}
+
+/* Día seleccionado */
+.calendario-dia.seleccionado {
+    background-color: var(--plateado);
+    color: var(--negro);
+    border-color: var(--plateado);
+    font-weight: 500;
+}
+
+/* Leyenda de colores bajo el calendario */
+.calendario-leyenda {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.leyenda-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blanco-suave);
+}
+
+.leyenda-punto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.leyenda-punto.verde    { background-color: #4caf50; }
+.leyenda-punto.amarillo { background-color: #f0c040; }
+.leyenda-punto.naranja  { background-color: #ff9800; }
+.leyenda-punto.rojo     { background-color: #ff4444; }
+
+/* =====================================================
    RESPONSIVE — Adaptación a móviles y tablets
    ===================================================== */
 
@@ -789,7 +970,7 @@ footer {
         display: block;
         width: 24px;
         height: 1px;
-        background-color: #333333;        /* Oscuro sobre fondo blanco */
+        background-color: #333333;
         transition: all 0.3s ease;
     }
 
@@ -843,6 +1024,15 @@ footer {
         grid-template-columns: 1fr;
         gap: 30px;
         text-align: center;
+    }
+
+    /* Calendario en móvil */
+    .calendario-dia {
+        font-size: 10px;
+    }
+
+    .calendario-leyenda {
+        gap: 10px;
     }
 }
 
