@@ -114,4 +114,35 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ---------------------------------------------------
+    // EFECTO TRANSPARENTE EN EL HEADER AL HACER SCROLL
+    // Cuando estamos arriba del todo el header es
+    // transparente. Al bajar se vuelve blanco con blur.
+    // ---------------------------------------------------
+    const headerEl = document.querySelector('header');
+
+    if (headerEl) {
+
+        // Función que actualiza el estado del header
+        function actualizarHeader() {
+            const scrollY = window.scrollY;
+
+            if (scrollY < 50) {
+                // Estamos arriba del todo: header transparente
+                headerEl.classList.add('en-top');
+                headerEl.classList.remove('transparente');
+            } else {
+                // Hemos bajado: header blanco con efecto blur
+                headerEl.classList.remove('en-top');
+                headerEl.classList.add('transparente');
+            }
+        }
+
+        // Ejecutamos al cargar la página para el estado inicial
+        actualizarHeader();
+
+        // Ejecutamos cada vez que el usuario hace scroll
+        window.addEventListener('scroll', actualizarHeader);
+    }
+
 });
