@@ -145,4 +145,48 @@ document.addEventListener('DOMContentLoaded', function () {
         window.addEventListener('scroll', actualizarHeader);
     }
 
+    // ---------------------------------------------------
+    // SELECCIÓN DE FECHA EN EL CALENDARIO VISUAL
+    // Al pulsar un día del calendario actualiza el
+    // campo oculto de fecha y recarga las horas
+    // ---------------------------------------------------
+    window.seleccionarFecha = function(fecha) {
+
+        // Actualizamos el campo oculto con la fecha seleccionada
+        const inputFechaOculto = document.getElementById('fecha');
+        if (inputFechaOculto) {
+            inputFechaOculto.value = fecha;
+        }
+
+        // Actualizamos el texto que muestra la fecha seleccionada
+        const texto = document.getElementById('fecha-seleccionada-texto');
+        if (texto) {
+            // Formateamos la fecha de YYYY-MM-DD a DD/MM/YYYY
+            const partes = fecha.split('-');
+            texto.textContent = '📅 ' + partes[2] + '/' + partes[1] + '/' + partes[0];
+        }
+
+        // Quitamos la clase seleccionado de todos los días
+        document.querySelectorAll('.calendario-dia').forEach(function(dia) {
+            dia.classList.remove('seleccionado');
+        });
+
+        // Añadimos la clase seleccionado al día pulsado
+        const diaSeleccionado = document.querySelector('[data-fecha="' + fecha + '"]');
+        if (diaSeleccionado) {
+            diaSeleccionado.classList.add('seleccionado');
+        }
+
+        // Enviamos el formulario para actualizar las horas disponibles
+        const form = document.querySelector('form');
+        if (form) {
+            const input = document.createElement('input');
+            input.type  = 'hidden';
+            input.name  = 'consultar_horas';
+            input.value = '1';
+            form.appendChild(input);
+            form.submit();
+        }
+    };
+
 });
