@@ -10,10 +10,10 @@
      PIE DE PÁGINA
      ================================================ -->
 <footer>
-   
+
     <!-- Logo imagen en el pie enlazado a la página principal -->
     <a href="<?= SITIO_URL ?>/index.php" style="display:block;">
-        <img src="http://tfc-peluqueria.atwebpages.com/assets/img/logo.png"
+        <img src="https://tfc-peluqueria.atwebpages.com/assets/img/logo.png"
              alt="Dioni Peluqueros"
              style="height:55px; width:auto; margin-bottom:20px;">
     </a>
@@ -31,8 +31,8 @@
     </p>
 </footer>
 
-<!-- JavaScript principal -->
-<script src="<?= SITIO_URL ?>/../assets/js/main.js"></script>
+<!-- JavaScript principal con HTTPS -->
+<script src="https://tfc-peluqueria.atwebpages.com/assets/js/main.js"></script>
 
 </body>
 </html>
