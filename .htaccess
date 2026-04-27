@@ -1,60 +1,66 @@
 # =====================================================
 # ARCHIVO: .htaccess
-# Descripción: Configuración de seguridad del servidor.
-#              Protege carpetas sensibles y mejora
-#              la seguridad general de la aplicación.
+# PROYECTO: TFC - Configuración de Seguridad y SSL
 # =====================================================
 
-# -- Activamos el motor de reescritura de Apache --
+# -------------------------------------------------------
+# 1. MOTOR DE REESCRITURA Y REDIRECCIÓN HTTPS
+# -------------------------------------------------------
 RewriteEngine On
 
-# -------------------------------------------------------
-# PROTECCIÓN DE LA CARPETA INCLUDES
-# Nadie puede acceder directamente a los archivos PHP
-# de includes desde el navegador
-# -------------------------------------------------------
-<FilesMatch "^(config|db|funciones|header|footer)\.php$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
+# Forzar HTTPS: Redirige cualquier petición HTTP a HTTPS automáticamente
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # -------------------------------------------------------
-# PROTECCIÓN DE LA CARPETA ADMIN
-# Si alguien intenta acceder a /admin sin estar logueado
-# el propio PHP lo redirige al login del admin.
-# Esta regla añade una capa extra de protección.
-# -------------------------------------------------------
-<IfModule mod_rewrite.c>
-    # Evitamos que se listen los archivos de las carpetas
-    Options -Indexes
-</IfModule>
-
-# -------------------------------------------------------
-# CABECERAS DE SEGURIDAD
-# Protegen contra ataques comunes como XSS o clickjacking
+# 2. CABECERAS DE SEGURIDAD (HTTP Headers)
 # -------------------------------------------------------
 <IfModule mod_headers.c>
-    # Evita que la web se cargue dentro de un iframe (clickjacking)
+    # Anti-Clickjacking: Evita que la web se cargue en iframes externos
     Header always set X-Frame-Options "SAMEORIGIN"
 
-    # Evita que el navegador adivine el tipo de contenido
+    # Anti-Sniffing: Evita que el navegador ignore el tipo de contenido definido
     Header always set X-Content-Type-Options "nosniff"
 
-    # Activa el filtro XSS del navegador
+    # Filtro XSS: Bloquea ataques de scripts entre sitios en navegadores antiguos
     Header always set X-XSS-Protection "1; mode=block"
+
+    # HSTS: Obliga al navegador a usar siempre HTTPS (opcional, actívalo tras probar)
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>
 
 # -------------------------------------------------------
-# PROTECCIÓN DE ARCHIVOS SENSIBLES
-# Nadie puede descargar el .htaccess ni el .gitignore
+# 3. RESTRICCIÓN DE ACCESO A ARCHIVOS SENSIBLES
 # -------------------------------------------------------
+
+# Evitamos que se listen los archivos de las carpetas (Directory Browsing)
+Options -Indexes
+
+# Bloquear acceso a archivos de configuración y núcleo (PHP)
+<FilesMatch "^(config|db|funciones|header|footer)\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Bloquear archivos ocultos (como el propio .htaccess o .gitignore)
 <FilesMatch "^\.">
-    Order Allow,Deny
-    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
 # -------------------------------------------------------
-# PÁGINA DE ERROR PERSONALIZADA
-# Si hay un error 404 redirigimos a la página principal
+# 4. GESTIÓN DE ERRORES
 # -------------------------------------------------------
+
+# Si hay un error 404, redirigimos a la página principal del proyecto
 ErrorDocument 404 /public/index.php
