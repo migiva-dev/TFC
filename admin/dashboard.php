@@ -148,6 +148,28 @@ require_once dirname(__DIR__) . '/includes/header.php';
         <!-- ----------------------------------------
              CALENDARIO DE GOOGLE — Vista semanal
              ---------------------------------------- -->
+        <section class="admin-calendar-section" aria-labelledby="agenda-google-title">
+            <div class="admin-section-header">
+                <div>
+                    <h2 id="agenda-google-title">Agenda - Google Calendar</h2>
+                    <p>Vista semanal sincronizada con las reservas confirmadas.</p>
+                </div>
+            </div>
+
+            <!-- Iframe del calendario de Google incrustado -->
+            <!-- mode=WEEK muestra la vista de semana completa -->
+            <div class="admin-calendar-card">
+                <iframe src="https://calendar.google.com/calendar/embed?src=miguelceacfp%40gmail.com&ctz=Europe%2FMadrid&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%230a0a0a&color=%23c0c0c0"
+                        title="Agenda semanal de Google Calendar"
+                        width="100%"
+                        height="600"
+                        frameborder="0"
+                        scrolling="no">
+                </iframe>
+            </div>
+        </section>
+
+        <?php /*
         <h2 style="font-size:20px; letter-spacing:4px;
                    text-transform:uppercase; margin-bottom:10px;">
             Agenda — Google Calendar
@@ -165,6 +187,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                     scrolling="no">
             </iframe>
         </div>
+        */ ?>
 
         <!-- ----------------------------------------
              TABLA DE RESERVAS RECIENTES
