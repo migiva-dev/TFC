@@ -56,6 +56,16 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
 
         } elseif ($accion === 'cancelar') {
 
+            // Antes de cancelar obtenemos el ID del evento de Google Calendar
+            $stmt = $conexion->prepare(
+                "SELECT google_event_id FROM reservas WHERE id = ?"
+            );
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $stmt->bind_result($google_event_id);
+            $stmt->fetch();
+            $stmt->close();
+
             // Cambiamos el estado de la reserva a 'cancelada'
             $stmt = $conexion->prepare(
                 "UPDATE reservas SET estado = 'cancelada' WHERE id = ?"
@@ -63,6 +73,12 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
             $stmt->bind_param('i', $id);
 
             if ($stmt->execute() && $stmt->affected_rows > 0) {
+
+                // Si había un evento en Google Calendar lo eliminamos
+                if (!empty($google_event_id)) {
+                    google_eliminar_evento($google_event_id);
+                }
+
                 $mensaje = 'Reserva cancelada correctamente.';
                 $tipo    = 'exito';
             } else {
