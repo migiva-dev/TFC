@@ -233,7 +233,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                 <p style="font-size:10px; letter-spacing:2px;
                           color:var(--blanco-suave); margin-bottom:20px;
                           text-transform:uppercase;">
-                    ℹ️ Las reservas creadas por el admin se confirman automáticamente
+                     Las reservas creadas por el admin se confirman automáticamente
                 </p>
 
                 <!-- Botones -->
