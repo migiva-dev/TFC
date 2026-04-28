@@ -170,21 +170,6 @@ require_once dirname(__DIR__) . '/includes/header.php';
         </section>
 
             Agenda — Google Calendar
-        </h2>
-        <div class="linea-deco" style="margin-bottom:30px;"></div>
-
-        <!-- Iframe del calendario de Google incrustado -->
-        <!-- mode=WEEK muestra la vista de semana completa -->
-        <div style="margin-bottom:50px; border:1px solid var(--negro-borde); overflow:hidden;">
-            <iframe src="https://calendar.google.com/calendar/embed?src=miguelceacfp%40gmail.com&ctz=Europe%2FMadrid&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%230a0a0a&color=%23c0c0c0"
-                    style="border:0; filter:invert(1) hue-rotate(180deg);"
-                    width="100%"
-                    height="600"
-                    frameborder="0"
-                    scrolling="no">
-            </iframe>
-        </div>
-        */ ?>
 
         <!-- ----------------------------------------
              TABLA DE RESERVAS RECIENTES
