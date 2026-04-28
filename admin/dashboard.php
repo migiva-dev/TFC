@@ -150,52 +150,25 @@ require_once dirname(__DIR__) . '/includes/header.php';
         </div>
 
         <!-- ----------------------------------------
-             CALENDARIO DE GOOGLE — Semana actual
+             CALENDARIO DE GOOGLE — Vista semanal
              ---------------------------------------- -->
         <h2 style="font-size:20px; letter-spacing:4px;
                    text-transform:uppercase; margin-bottom:10px;">
-            Agenda esta semana
+            Agenda — Google Calendar
         </h2>
         <div class="linea-deco" style="margin-bottom:30px;"></div>
 
-        <?php if (!empty($eventos_semana)): ?>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-                    gap:15px; margin-bottom:50px;">
-            <?php foreach ($eventos_semana as $evento): ?>
-            <div style="background-color:var(--negro);
-                        border:1px solid var(--negro-borde);
-                        padding:20px 25px;
-                        border-left: 3px solid var(--plateado);">
-
-                <!-- Título del evento (nombre del servicio y cliente) -->
-                <p style="font-family:var(--fuente-titulo); font-size:16px;
-                          letter-spacing:2px; color:var(--blanco);
-                          margin-bottom:8px;">
-                    <?= limpiar($evento['summary'] ?? 'Sin título') ?>
-                </p>
-
-                <!-- Fecha y hora del evento -->
-                <p style="font-size:10px; letter-spacing:2px;
-                          color:var(--plateado); text-transform:uppercase;
-                          margin-bottom:8px;">
-                    <?php
-                    // Formateamos la fecha y hora del evento
-                    $fecha_evento = $evento['start']['dateTime'] ?? '';
-                    if (!empty($fecha_evento)) {
-                        echo ' ' . date('d/m/Y', strtotime($fecha_evento));
-                        echo ' &nbsp; ' . date('H:i', strtotime($fecha_evento));
-                        echo ' — ' . date('H:i', strtotime($evento['end']['dateTime']));
-                    }
-                    ?>
-                </p>
-
-                <!-- Descripción del evento (datos del cliente) -->
-                <?php if (!empty($evento['description'])): ?>
-                <p style="font-size:11px; color:var(--blanco-suave);
-                          line-height:1.8; white-space:pre-line;">
-                    <?= limpiar($evento['description']) ?>
-                </p>
-                <?php endif; ?>
+        <!-- Iframe del calendario de Google -->
+        <!-- mode=week muestra la vista semanal -->
+        <div style="margin-bottom:50px; border:1px solid var(--negro-borde); overflow:hidden;">
+            <iframe src="https://calendar.google.com/calendar/embed?src=miguelceacfp%40gmail.com&ctz=Europe%2FMadrid&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%230a0a0a&color=%23c0c0c0"
+                    style="border:0; filter:invert(1) hue-rotate(180deg);"
+                    width="100%"
+                    height="600"
+                    frameborder="0"
+                    scrolling="no">
+            </iframe>
+        </div>
 
             </div>
             <?php endforeach; ?>
