@@ -161,14 +161,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $stmt->bind_param('iisss', $usuario_id, $servicio_id, $fecha, $hora, $notas);
 
-                if ($stmt->execute()) {
-                    $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
-                             date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
-                } else {
-                    $error = 'Error al guardar la reserva. Inténtalo de nuevo.';
+               if ($stmt->execute()) {
+                // Obtenemos el ID de la reserva recién creada
+                $reserva_id = $stmt->insert_id;
+                $stmt->close();
+
+                // -- Creamos el evento en Google Calendar --
+                // Obtenemos los datos del cliente para el evento
+                $stmt2 = $conexion->prepare(
+                    "SELECT nombre, apellidos, telefono FROM usuarios WHERE id = ?"
+                );
+                $stmt2->bind_param('i', $usuario_id);
+                $stmt2->execute();
+                $stmt2->bind_result($cli_nombre, $cli_apellidos, $cli_telefono);
+                $stmt2->fetch();
+                $stmt2->close();
+
+                // Obtenemos los datos del servicio para el evento
+                $stmt3 = $conexion->prepare(
+                    "SELECT nombre, duracion, precio FROM servicios WHERE id = ?"
+                );
+                $stmt3->bind_param('i', $servicio_id);
+                $stmt3->execute();
+                $stmt3->bind_result($srv_nombre, $srv_duracion, $srv_precio);
+                $stmt3->fetch();
+                $stmt3->close();
+
+                // Creamos el evento en Google Calendar
+                $cliente  = [
+                    'nombre'    => $cli_nombre,
+                    'apellidos' => $cli_apellidos,
+                    'telefono'  => $cli_telefono
+                ];
+                $servicio_data = [
+                    'nombre'   => $srv_nombre,
+                    'duracion' => $srv_duracion,
+                    'precio'   => $srv_precio
+                ];
+
+                $google_event_id = google_crear_evento(
+                    $cliente,
+                    $servicio_data,
+                    $fecha,
+                    $hora,
+                    $notas
+                );
+
+                // Si se creó el evento guardamos su ID en la BD
+                if ($google_event_id) {
+                    $stmt4 = $conexion->prepare(
+                        "UPDATE reservas SET google_event_id = ? WHERE id = ?"
+                    );
+                    $stmt4->bind_param('si', $google_event_id, $reserva_id);
+                    $stmt4->execute();
+                    $stmt4->close();
                 }
 
+                $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
+                         date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
+
+            } else {
+                $error = 'Error al guardar la reserva. Inténtalo de nuevo.';
                 $stmt->close();
+            } 
             }
         }
 
