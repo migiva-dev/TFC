@@ -12,7 +12,6 @@ require_once dirname(__DIR__) . '/includes/config.php';
 require_once dirname(__DIR__) . '/includes/db.php';
 require_once dirname(__DIR__) . '/includes/funciones.php';
 
-
 // -- Control de sesión --
 // Si no hay sesión de admin activa redirige al login del admin
 requiere_admin();
@@ -60,7 +59,6 @@ $reservas = $conexion->query(
      ORDER BY r.fecha ASC, r.hora ASC
      LIMIT 10"
 );
-
 
 // Incluimos la cabecera común
 require_once dirname(__DIR__) . '/includes/header.php';
@@ -156,8 +154,8 @@ require_once dirname(__DIR__) . '/includes/header.php';
         </h2>
         <div class="linea-deco" style="margin-bottom:30px;"></div>
 
-        <!-- Iframe del calendario de Google -->
-        <!-- mode=week muestra la vista semanal -->
+        <!-- Iframe del calendario de Google incrustado -->
+        <!-- mode=WEEK muestra la vista de semana completa -->
         <div style="margin-bottom:50px; border:1px solid var(--negro-borde); overflow:hidden;">
             <iframe src="https://calendar.google.com/calendar/embed?src=miguelceacfp%40gmail.com&ctz=Europe%2FMadrid&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%230a0a0a&color=%23c0c0c0"
                     style="border:0; filter:invert(1) hue-rotate(180deg);"
@@ -167,17 +165,6 @@ require_once dirname(__DIR__) . '/includes/header.php';
                     scrolling="no">
             </iframe>
         </div>
-
-            </div>
-            <?php endforeach; ?>
-        </div>
-
-        <?php else: ?>
-            <p style="color:var(--blanco-suave); font-size:13px;
-                      letter-spacing:1px; margin-bottom:50px;">
-                No hay citas programadas para esta semana.
-            </p>
-        <?php endif; ?>
 
         <!-- ----------------------------------------
              TABLA DE RESERVAS RECIENTES
