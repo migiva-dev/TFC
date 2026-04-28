@@ -150,6 +150,65 @@ require_once dirname(__DIR__) . '/includes/header.php';
         </div>
 
         <!-- ----------------------------------------
+             CALENDARIO DE GOOGLE — Semana actual
+             ---------------------------------------- -->
+        <h2 style="font-size:20px; letter-spacing:4px;
+                   text-transform:uppercase; margin-bottom:10px;">
+            Agenda esta semana
+        </h2>
+        <div class="linea-deco" style="margin-bottom:30px;"></div>
+
+        <?php if (!empty($eventos_semana)): ?>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+                    gap:15px; margin-bottom:50px;">
+            <?php foreach ($eventos_semana as $evento): ?>
+            <div style="background-color:var(--negro);
+                        border:1px solid var(--negro-borde);
+                        padding:20px 25px;
+                        border-left: 3px solid var(--plateado);">
+
+                <!-- Título del evento (nombre del servicio y cliente) -->
+                <p style="font-family:var(--fuente-titulo); font-size:16px;
+                          letter-spacing:2px; color:var(--blanco);
+                          margin-bottom:8px;">
+                    <?= limpiar($evento['summary'] ?? 'Sin título') ?>
+                </p>
+
+                <!-- Fecha y hora del evento -->
+                <p style="font-size:10px; letter-spacing:2px;
+                          color:var(--plateado); text-transform:uppercase;
+                          margin-bottom:8px;">
+                    <?php
+                    // Formateamos la fecha y hora del evento
+                    $fecha_evento = $evento['start']['dateTime'] ?? '';
+                    if (!empty($fecha_evento)) {
+                        echo ' ' . date('d/m/Y', strtotime($fecha_evento));
+                        echo ' &nbsp; ' . date('H:i', strtotime($fecha_evento));
+                        echo ' — ' . date('H:i', strtotime($evento['end']['dateTime']));
+                    }
+                    ?>
+                </p>
+
+                <!-- Descripción del evento (datos del cliente) -->
+                <?php if (!empty($evento['description'])): ?>
+                <p style="font-size:11px; color:var(--blanco-suave);
+                          line-height:1.8; white-space:pre-line;">
+                    <?= limpiar($evento['description']) ?>
+                </p>
+                <?php endif; ?>
+
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+        <?php else: ?>
+            <p style="color:var(--blanco-suave); font-size:13px;
+                      letter-spacing:1px; margin-bottom:50px;">
+                No hay citas programadas para esta semana.
+            </p>
+        <?php endif; ?>
+
+        <!-- ----------------------------------------
              TABLA DE RESERVAS RECIENTES
              ---------------------------------------- -->
         <h2 style="font-size:20px; letter-spacing:4px;
