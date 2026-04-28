@@ -133,8 +133,9 @@ TFC/
 │   ├── config.php           # Configuración general
 │   ├── db.php               # Conexión a base de datos
 │   ├── header.php           # Cabecera reutilizable
-│   ├── footer.php           # Footer reutilizable
-│   └── funciones.php        # Funciones auxiliares
+│   ├── footer.php           # Pie reutilizable
+│   ├── funciones.php        # Funciones auxiliares       
+│   └── google-calendar.php  # Integración con Google Calendar API
 │
 ├── public/
 │   ├── index.php            # Página principal
