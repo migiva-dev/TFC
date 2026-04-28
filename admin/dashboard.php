@@ -11,7 +11,7 @@
 require_once dirname(__DIR__) . '/includes/config.php';
 require_once dirname(__DIR__) . '/includes/db.php';
 require_once dirname(__DIR__) . '/includes/funciones.php';
-require_once dirname(__DIR__) . '/includes/google-calendar.php';
+
 
 // -- Control de sesión --
 // Si no hay sesión de admin activa redirige al login del admin
@@ -61,8 +61,6 @@ $reservas = $conexion->query(
      LIMIT 10"
 );
 
-// -- Obtenemos los eventos de Google Calendar de esta semana --
-$eventos_semana = google_obtener_eventos_semana();
 
 // Incluimos la cabecera común
 require_once dirname(__DIR__) . '/includes/header.php';
