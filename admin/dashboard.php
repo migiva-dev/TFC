@@ -61,6 +61,9 @@ $reservas = $conexion->query(
      LIMIT 10"
 );
 
+// -- Obtenemos los eventos de Google Calendar de esta semana --
+$eventos_semana = google_obtener_eventos_semana();
+
 // Incluimos la cabecera común
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
