@@ -169,9 +169,6 @@ require_once dirname(__DIR__) . '/includes/header.php';
             </div>
         </section>
 
-        <?php /*
-        <h2 style="font-size:20px; letter-spacing:4px;
-                   text-transform:uppercase; margin-bottom:10px;">
             Agenda — Google Calendar
         </h2>
         <div class="linea-deco" style="margin-bottom:30px;"></div>
