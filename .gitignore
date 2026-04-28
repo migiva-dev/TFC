@@ -1,5 +1,6 @@
 # Archivo de configuración con datos sensibles (contraseñas de BD)
 includes/config.php
+includes/google-calendar.php
 
 # Archivos del sistema
 .DS_Store
