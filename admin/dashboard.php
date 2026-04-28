@@ -168,12 +168,6 @@ require_once dirname(__DIR__) . '/includes/header.php';
                 </iframe>
             </div>
         </section>
-        <?php /*
-
-            Agenda — Google Calendar
-
-        */ ?>
-
         <!-- ----------------------------------------
              TABLA DE RESERVAS RECIENTES
              ---------------------------------------- -->
