@@ -90,6 +90,12 @@ require_once dirname(__DIR__) . '/includes/header.php';
                 </a>
             </li>
             <li>
+                <!-- Enlace para crear una nueva reserva manualmente -->
+                <a href="nueva-reserva.php">
+                    Nueva reserva
+                </a>
+            </li>
+            <li>
                 <!-- Cerrar sesión del administrador -->
                 <a href="logout.php">
                     Cerrar sesión
