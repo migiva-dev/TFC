@@ -19,12 +19,17 @@ La aplicación permite:
 - Gestión de disponibilidad
 - Panel de administración
 - Confirmación y cancelación de reservas
+- Sincronización automática con Google Calendar
 
 ---
 
-## 🚀 Repositorio
+## 🌐 Demo online
 
-Repositorio oficial del proyecto:
+El proyecto está desplegado y disponible públicamente en:
+
+🔗 https://tfc-peluqueria.atwebpages.com/
+
+Repositorio oficial:
 
 🔗 https://github.com/migiva-dev/TFC
 
@@ -33,10 +38,11 @@ Repositorio oficial del proyecto:
 # 🛠 Tecnologías utilizadas
 
 ## Backend
-- PHP (programación principal del servidor)
+- PHP
 - Gestión de sesiones
 - Validación de formularios
 - Lógica de reservas
+- Integración con APIs externas
 
 ## Base de datos
 - MySQL
@@ -48,7 +54,19 @@ Repositorio oficial del proyecto:
 - CSS3
 - JavaScript Vanilla
 
+## APIs y servicios externos
+- Google Calendar API
+- JWT Authentication
+- Google Service Account
+
+## Hosting / Despliegue
+- AwardSpace
+- Apache
+- HTTPS
+- `.htaccess`
+
 ## Diseño UI
+
 Diseño inspirado en una estética premium:
 
 - Negro
@@ -91,61 +109,31 @@ Los usuarios pueden:
 - Elegir hora
 - Seleccionar servicio
 - Confirmar cita
+- Ver horas ocupadas en tiempo real
+- Evitar fechas pasadas
+- Añadir notas personalizadas
 
 ---
 
-# 🔐 Panel de administración
+# 📅 Integración con Google Calendar
 
-El sistema cuenta con una zona privada para administradores:
+El sistema incorpora integración automática con **Google Calendar API**, permitiendo sincronizar todas las reservas con un calendario real.
 
-### Funciones del administrador:
-- Ver todas las reservas
-- Confirmar reservas
-- Cancelar reservas
-- Gestionar estado de citas
-- Visualizar información de clientes
+### Funcionalidades implementadas:
 
----
+- Creación automática de eventos al reservar una cita
+- Eliminación automática de eventos al cancelar reservas
+- Consulta de eventos semanales
+- Autenticación mediante JWT
+- Uso de Google Service Account
 
-# 🗂️ Estructura real del proyecto
+### Flujo de sincronización
 
-```bash
-TFC/
-│
-├── admin/
-│   ├── dashboard.php        # Panel principal del administrador
-│   ├── gestionar.php        # Gestión de reservas
-│   ├── login.php            # Login administrador
-│   └── logout.php           # Cierre de sesión administrador
-│
-├── assets/
-│   │
-│   ├── css/
-│   │   └── estilo.css       # Estilos principales del sistema
-│   │
-│   ├── img/
-│   │   └── logo.png         # Recursos visuales e imágenes
-│   │
-│   └── js/
-│       └── main.js          # Funcionalidades frontend
-│
-├── includes/
-│   ├── config.php           # Configuración general
-│   ├── db.php               # Conexión a base de datos
-│   ├── header.php           # Cabecera reutilizable
-│   ├── footer.php           # Pie reutilizable
-│   ├── funciones.php        # Funciones auxiliares       
-│   └── google-calendar.php  # Integración con Google Calendar API
-│
-├── public/
-│   ├── index.php            # Página principal
-│   ├── login.php            # Login usuarios
-│   ├── logout.php           # Logout usuarios
-│   ├── registro.php         # Registro usuarios
-│   ├── reservar.php         # Sistema de reservas
-│   └── servicios.php        # Catálogo de servicios
-│
-├── sql/
-│   └── peluqueria.sql       # Base de datos del proyecto
-│
-└── README.md
+```text
+Cliente realiza reserva
+↓
+Reserva guardada en MySQL
+↓
+Evento creado automáticamente en Google Calendar
+↓
+Administrador visualiza la cita
