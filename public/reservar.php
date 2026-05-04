@@ -10,7 +10,7 @@
 require_once '../includes/config.php';
 require_once '../includes/db.php';
 require_once '../includes/funciones.php';
-require_once '../includes/google-calendar.php';
+
 
 // -- Control de sesión --
 // Si el usuario no está logueado lo mandamos al login
