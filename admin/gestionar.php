@@ -55,16 +55,6 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
 
         } elseif ($accion === 'cancelar') {
 
-            // Antes de cancelar obtenemos el ID del evento de Google Calendar
-            $stmt = $conexion->prepare(
-                "SELECT id FROM reservas WHERE id = ?"
-            );
-            $stmt->bind_param('i', $id);
-            $stmt->execute();
-            $stmt->bind_result($google_event_id);
-            $stmt->fetch();
-            $stmt->close();
-
             // Cambiamos el estado de la reserva a 'cancelada'
             $stmt = $conexion->prepare(
                 "UPDATE reservas SET estado = 'cancelada' WHERE id = ?"
@@ -73,7 +63,6 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
 
             if ($stmt->execute() && $stmt->affected_rows > 0) {
 
-                // Si había un evento en Google Calendar lo eliminamos
                 $mensaje = 'Reserva cancelada correctamente.';
                 $tipo    = 'exito';
             } else {
@@ -83,22 +72,6 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
 
             $stmt->close();
 
-        } elseif ($accion === 'cancelar_repetido') {
-
-            $stmt = $conexion->prepare(
-                "UPDATE reservas SET estado = 'cancelada' WHERE id = ?"
-            );
-            $stmt->bind_param('i', $id);
-
-            if ($stmt->execute() && $stmt->affected_rows > 0) {
-                $mensaje = 'Reserva cancelada correctamente.';
-                $tipo    = 'exito';
-            } else {
-                $mensaje = 'No se pudo cancelar la reserva.';
-                $tipo    = 'error';
-            }
-
-            $stmt->close();
         } else {
             // Acción no reconocida
             $mensaje = 'Acción no válida.';

@@ -161,25 +161,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $stmt->bind_param('iisss', $usuario_id, $servicio_id, $fecha, $hora, $notas);
 
-               if ($stmt->execute()) {
-                
-               $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
-                         date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
+                if ($stmt->execute()) {
+                    $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
+                             date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
+                } else {
+                    $error = 'Error al guardar la reserva. Inténtalo de nuevo.';
+                }
+
                 $stmt->close();
-                
-                // Obtenemos los datos del cliente para el evento
-
-                // Obtenemos los datos del servicio para el evento
-
-                // Creamos el evento en Google Calendar
-                // Si se creó el evento guardamos su ID en la BD
-                $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
-                         date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
-
-            } else {
-                $error = 'Error al guardar la reserva. Inténtalo de nuevo.';
-                $stmt->close();
-            } 
             }
         }
 
