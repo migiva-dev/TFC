@@ -170,14 +170,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Obtenemos los datos del cliente para el evento
 
                 // Obtenemos los datos del servicio para el evento
-                $stmt3 = $conexion->prepare(
-                    "SELECT nombre, duracion, precio FROM servicios WHERE id = ?"
-                );
-                $stmt3->bind_param('i', $servicio_id);
-                $stmt3->execute();
-                $stmt3->bind_result($srv_nombre, $srv_duracion, $srv_precio);
-                $stmt3->fetch();
-                $stmt3->close();
 
                 // Creamos el evento en Google Calendar
                 $cliente  = [
