@@ -11,7 +11,6 @@ require_once '../includes/config.php';
 require_once '../includes/db.php';
 require_once '../includes/funciones.php';
 
-
 // -- Control de sesión --
 // Si el usuario no está logueado lo mandamos al login
 requiere_usuario();
@@ -34,8 +33,8 @@ for ($h = 9; $h < 20; $h++) {
     $horas_disponibles[] = sprintf('%02d:30', $h);
 }
 
-$error  = '';
-$exito  = '';
+$error = '';
+$exito = '';
 
 // -------------------------------------------------------
 // Calculamos la disponibilidad de cada día del mes
@@ -47,12 +46,18 @@ $total_horas_dia = 22; // 22 franjas horarias disponibles
 
 // Mes y año que se está viendo en el calendario
 // Por defecto el mes actual
-$mes_actual  = intval($_GET['mes']  ?? date('n'));
+$mes_actual  = intval($_GET['mes'] ?? date('n'));
 $anio_actual = intval($_GET['anio'] ?? date('Y'));
 
 // Nos aseguramos de que el mes esté entre 1 y 12
-if ($mes_actual < 1)  { $mes_actual = 12; $anio_actual--; }
-if ($mes_actual > 12) { $mes_actual = 1;  $anio_actual++; }
+if ($mes_actual < 1) {
+    $mes_actual = 12;
+    $anio_actual--;
+}
+if ($mes_actual > 12) {
+    $mes_actual = 1;
+    $anio_actual++;
+}
 
 // Consultamos cuántas reservas hay por día en ese mes
 $stmt = $conexion->prepare(
@@ -74,7 +79,6 @@ while ($fila = $resultado_mes->fetch_assoc()) {
     $reservas_por_dia[$dia] = intval($fila['total']);
 }
 $stmt->close();
-
 
 // -- Obtenemos las horas ocupadas para la fecha seleccionada --
 // Se usa para deshabilitar horas ya reservadas en el selector
@@ -110,9 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Recogemos y limpiamos los datos del formulario
         $servicio_id = intval($_POST['servicio_id'] ?? 0);
-        $fecha       = trim($_POST['fecha']         ?? '');
-        $hora        = trim($_POST['hora']          ?? '');
-        $notas       = trim($_POST['notas']         ?? '');
+        $fecha       = trim($_POST['fecha'] ?? '');
+        $hora        = trim($_POST['hora'] ?? '');
+        $notas       = trim($_POST['notas'] ?? '');
 
         // -- Validaciones --
 
@@ -162,13 +166,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('iisss', $usuario_id, $servicio_id, $fecha, $hora, $notas);
 
                 if ($stmt->execute()) {
+
+                    // ID de la reserva recién creada. Antes faltaba esta variable.
+                    $reserva_id = $conexion->insert_id;
+
+                    $stmt->close();
+
+                    // Mensaje de éxito principal.
+                    // La reserva ya está guardada aunque Google Calendar no esté configurado.
                     $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
                              date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
+
+                    // -------------------------------------------------------
+                    // Google Calendar opcional
+                    // -------------------------------------------------------
+                    // Evitamos el error fatal comprobando que la función exista.
+                    // Si no existe google_crear_evento(), simplemente no se crea
+                    // evento en Google Calendar, pero la reserva no falla.
+                    if (function_exists('google_crear_evento')) {
+
+                        // Obtenemos los datos del cliente para el evento
+                        $stmt2 = $conexion->prepare(
+                            "SELECT nombre, apellidos, telefono FROM usuarios WHERE id = ?"
+                        );
+                        $stmt2->bind_param('i', $usuario_id);
+                        $stmt2->execute();
+                        $stmt2->bind_result($cli_nombre, $cli_apellidos, $cli_telefono);
+                        $stmt2->fetch();
+                        $stmt2->close();
+
+                        // Obtenemos los datos del servicio para el evento
+                        $stmt3 = $conexion->prepare(
+                            "SELECT nombre, duracion, precio FROM servicios WHERE id = ?"
+                        );
+                        $stmt3->bind_param('i', $servicio_id);
+                        $stmt3->execute();
+                        $stmt3->bind_result($srv_nombre, $srv_duracion, $srv_precio);
+                        $stmt3->fetch();
+                        $stmt3->close();
+
+                        // Creamos el evento en Google Calendar
+                        $cliente = [
+                            'nombre'    => $cli_nombre,
+                            'apellidos' => $cli_apellidos,
+                            'telefono'  => $cli_telefono
+                        ];
+
+                        $servicio_data = [
+                            'nombre'   => $srv_nombre,
+                            'duracion' => $srv_duracion,
+                            'precio'   => $srv_precio
+                        ];
+
+                        $google_event_id = google_crear_evento(
+                            $cliente,
+                            $servicio_data,
+                            $fecha,
+                            $hora,
+                            $notas
+                        );
+
+                        // Si se creó el evento guardamos su ID en la BD
+                        if ($google_event_id) {
+                            $stmt4 = $conexion->prepare(
+                                "UPDATE reservas SET google_event_id = ? WHERE id = ?"
+                            );
+                            $stmt4->bind_param('si', $google_event_id, $reserva_id);
+                            $stmt4->execute();
+                            $stmt4->close();
+                        }
+                    }
+
                 } else {
                     $error = 'Error al guardar la reserva. Inténtalo de nuevo.';
+                    $stmt->close();
                 }
-
-                $stmt->close();
             }
         }
 
@@ -294,11 +366,11 @@ require_once '../includes/header.php';
                 <div class="calendario-grid">
                     <?php
                     // Primer día del mes (1=lunes...7=domingo en ISO)
-                    $primer_dia    = date('N', mktime(0, 0, 0, $mes_actual, 1, $anio_actual));
+                    $primer_dia  = date('N', mktime(0, 0, 0, $mes_actual, 1, $anio_actual));
                     // Total de días del mes
-                    $dias_en_mes   = date('t', mktime(0, 0, 0, $mes_actual, 1, $anio_actual));
+                    $dias_en_mes = date('t', mktime(0, 0, 0, $mes_actual, 1, $anio_actual));
                     // Fecha de hoy para comparar
-                    $hoy           = date('Y-m-d');
+                    $hoy = date('Y-m-d');
 
                     // Celdas vacías antes del primer día
                     for ($i = 1; $i < $primer_dia; $i++) {
@@ -327,13 +399,13 @@ require_once '../includes/header.php';
                             $porcentaje   = ($reservas_hoy / $total_horas_dia) * 100;
 
                             if ($porcentaje >= 100) {
-                                $clase = 'completo';       // Rojo: lleno
+                                $clase = 'completo';        // Rojo: lleno
                             } elseif ($porcentaje >= 70) {
                                 $clase = 'disponible-poco'; // Naranja: pocas horas
                             } elseif ($porcentaje >= 40) {
                                 $clase = 'disponible-medio'; // Amarillo: algunas horas
                             } else {
-                                $clase = 'disponible-alto';  // Verde: muchas horas
+                                $clase = 'disponible-alto'; // Verde: muchas horas
                             }
                         }
 
@@ -345,7 +417,11 @@ require_once '../includes/header.php';
 
                         // Pintamos el día
                         // Si se puede seleccionar añadimos data-fecha
-                        if (!in_array($clase, ['pasado', 'domingo', 'completo'])) {
+                        // Corregido: antes in_array fallaba cuando $clase tenía "seleccionado" añadido.
+                        $clases_no_seleccionables = ['pasado', 'domingo', 'completo'];
+                        $clase_base = explode(' ', $clase)[0];
+
+                        if (!in_array($clase_base, $clases_no_seleccionables)) {
                             echo "<div class=\"calendario-dia {$clase}\"
                                        data-fecha=\"{$fecha_dia}\"
                                        onclick=\"seleccionarFecha('{$fecha_dia}')\">{$dia}</div>";
