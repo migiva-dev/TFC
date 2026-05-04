@@ -312,7 +312,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                             <?php
                             $fecha_sel = $_POST['fecha'] ?? $_GET['fecha'] ?? '';
                             echo !empty($fecha_sel)
-                                ? '📅 ' . date('d/m/Y', strtotime($fecha_sel))
+                                ? ' ' . date('d/m/Y', strtotime($fecha_sel))
                                 : '🗓 Selecciona un día del calendario';
                             ?>
                         </p>
