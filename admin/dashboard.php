@@ -2,53 +2,70 @@
 // =====================================================
 // ARCHIVO: admin/dashboard.php
 // Descripción: Panel principal del administrador.
-//              Muestra estadísticas generales y las
-//              reservas más recientes.
+//              Muestra estadísticas, calendario semanal
+//              con las citas de la BD y reservas recientes.
 //              Acceso restringido: solo administradores.
 // =====================================================
 
-// Incluimos configuración, conexión y funciones
 require_once dirname(__DIR__) . '/includes/config.php';
 require_once dirname(__DIR__) . '/includes/db.php';
 require_once dirname(__DIR__) . '/includes/funciones.php';
 
-// -- Control de sesión --
-// Si no hay sesión de admin activa redirige al login del admin
 requiere_admin();
 
 $titulo_pagina = 'Panel de administración';
-
-// Nombre del admin logueado para mostrarlo en el panel
-$admin_nombre = $_SESSION[ADMIN_SESSION_KEY]['nombre'];
+$admin_nombre  = $_SESSION[ADMIN_SESSION_KEY]['nombre'];
 
 // -------------------------------------------------------
-// Consultas a la BD para obtener las estadísticas
+// Estadísticas generales
 // -------------------------------------------------------
-
-// Total de reservas pendientes
 $total_pendientes = $conexion->query(
     "SELECT COUNT(*) as total FROM reservas WHERE estado = 'pendiente'"
 )->fetch_assoc()['total'];
 
-// Total de reservas confirmadas
 $total_confirmadas = $conexion->query(
     "SELECT COUNT(*) as total FROM reservas WHERE estado = 'confirmada'"
 )->fetch_assoc()['total'];
 
-// Total de clientes registrados
 $total_clientes = $conexion->query(
     "SELECT COUNT(*) as total FROM usuarios"
 )->fetch_assoc()['total'];
 
-// Total de reservas de hoy
 $total_hoy = $conexion->query(
     "SELECT COUNT(*) as total FROM reservas
-     WHERE fecha = CURDATE()
-     AND estado != 'cancelada'"
+     WHERE fecha = CURDATE() AND estado != 'cancelada'"
 )->fetch_assoc()['total'];
 
-// Últimas 10 reservas con datos del cliente y servicio
-// Usamos JOIN para unir las tres tablas
+// -------------------------------------------------------
+// Semana actual para el calendario
+// Lunes a Sábado de la semana en curso
+// -------------------------------------------------------
+$hoy           = date('Y-m-d');
+$lunes         = date('Y-m-d', strtotime('monday this week'));
+$sabado        = date('Y-m-d', strtotime('saturday this week'));
+
+// Obtenemos todas las reservas de esta semana con datos del cliente y servicio
+$reservas_semana = $conexion->query(
+    "SELECT r.fecha, r.hora, r.estado,
+            u.nombre, u.apellidos,
+            s.nombre AS servicio, s.duracion
+     FROM reservas r
+     JOIN usuarios  u ON r.usuario_id  = u.id
+     JOIN servicios s ON r.servicio_id = s.id
+     WHERE r.fecha BETWEEN '{$lunes}' AND '{$sabado}'
+     AND r.estado != 'cancelada'
+     ORDER BY r.fecha ASC, r.hora ASC"
+);
+
+// Agrupamos las reservas por fecha para pintarlas en el calendario
+$citas_por_dia = [];
+while ($c = $reservas_semana->fetch_assoc()) {
+    $citas_por_dia[$c['fecha']][] = $c;
+}
+
+// -------------------------------------------------------
+// Próximas 10 reservas
+// -------------------------------------------------------
 $reservas = $conexion->query(
     "SELECT r.id, r.fecha, r.hora, r.estado, r.notas,
             u.nombre, u.apellidos, u.telefono,
@@ -60,119 +77,124 @@ $reservas = $conexion->query(
      LIMIT 10"
 );
 
-// Incluimos la cabecera común
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
 
-<!-- ================================================
-     LAYOUT DEL PANEL DE ADMINISTRACIÓN
-     ================================================ -->
 <div class="admin-layout">
 
-    <!-- ============================================
-         SIDEBAR — Menú lateral izquierdo
-         ============================================ -->
+    <!-- SIDEBAR -->
     <aside class="admin-sidebar">
-
-        <!-- Logo en el sidebar -->
         <div class="logo-admin">Dioni</div>
-
-        <!-- Menú de navegación del panel -->
         <ul>
-            <li>
-                <a href="dashboard.php" class="activo">
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="gestionar.php">
-                    Reservas
-                </a>
-            </li>
-            <li>
-                <!-- Enlace para crear una nueva reserva manualmente -->
-                <a href="nueva-reserva.php">
-                    Nueva reserva
-                </a>
-            </li>
-            <li>
-                <!-- Cerrar sesión del administrador -->
-                <a href="logout.php">
-                    Cerrar sesión
-                </a>
-            </li>
+            <li><a href="dashboard.php" class="activo">Dashboard</a></li>
+            <li><a href="gestionar.php">Reservas</a></li>
+            <li><a href="nueva-reserva.php">Nueva reserva</a></li>
+            <li><a href="logout.php">Cerrar sesión</a></li>
         </ul>
-
     </aside>
 
-    <!-- ============================================
-         CONTENIDO PRINCIPAL DEL DASHBOARD
-         ============================================ -->
+    <!-- CONTENIDO PRINCIPAL -->
     <main class="admin-contenido">
 
-        <!-- Saludo con el nombre del admin -->
         <h1>Bienvenido, <?= limpiar($admin_nombre) ?></h1>
         <div class="linea-deco"></div>
 
-        <!-- ----------------------------------------
-             TARJETAS DE ESTADÍSTICAS
-             ---------------------------------------- -->
+        <!-- TARJETAS DE ESTADÍSTICAS -->
         <div class="stats-grid">
-
-            <!-- Reservas pendientes -->
             <div class="stat-card">
                 <div class="stat-numero"><?= $total_pendientes ?></div>
                 <div class="stat-label">Pendientes</div>
             </div>
-
-            <!-- Reservas confirmadas -->
             <div class="stat-card">
                 <div class="stat-numero"><?= $total_confirmadas ?></div>
                 <div class="stat-label">Confirmadas</div>
             </div>
-
-            <!-- Citas de hoy -->
             <div class="stat-card">
                 <div class="stat-numero"><?= $total_hoy ?></div>
                 <div class="stat-label">Citas hoy</div>
             </div>
-
-            <!-- Total de clientes registrados -->
             <div class="stat-card">
                 <div class="stat-numero"><?= $total_clientes ?></div>
                 <div class="stat-label">Clientes</div>
             </div>
-
         </div>
 
         <!-- ----------------------------------------
-             CALENDARIO DE GOOGLE — Vista semanal
-             ---------------------------------------- -->
-        <section class="admin-calendar-section" aria-labelledby="agenda-google-title">
-            <div class="admin-section-header">
-                <div>
-                    <h2 id="agenda-google-title">Agenda - Google Calendar</h2>
-                    <p>Vista semanal sincronizada con las reservas confirmadas.</p>
-                </div>
-            </div>
-
-            <!-- Iframe del calendario de Google incrustado -->
-            <!-- mode=WEEK muestra la vista de semana completa -->
-            <div class="admin-calendar-card">
-                <iframe src="https://calendar.google.com/calendar/embed?src=miguelceacfp%40gmail.com&ctz=Europe%2FMadrid&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%230a0a0a&color=%23c0c0c0"
-                        title="Agenda semanal de Google Calendar"
-                        width="100%"
-                        height="600"
-                        frameborder="0"
-                        scrolling="no">
-                </iframe>
-            </div>
-        </section>
-        <!-- ----------------------------------------
-             TABLA DE RESERVAS RECIENTES
+             CALENDARIO SEMANAL
              ---------------------------------------- -->
         <h2 style="font-size:20px; letter-spacing:4px;
                    text-transform:uppercase; margin-bottom:10px;">
+            Agenda esta semana
+        </h2>
+        <div class="linea-deco" style="margin-bottom:25px;"></div>
+
+        <!-- Fechas de la semana -->
+        <p style="font-size:10px; letter-spacing:2px; color:var(--blanco-suave);
+                  text-transform:uppercase; margin-bottom:20px;">
+            <?= date('d/m', strtotime($lunes)) ?> — <?= date('d/m/Y', strtotime($sabado)) ?>
+        </p>
+
+        <!-- Grid semanal: 6 columnas (Lun-Sáb) -->
+        <div class="semana-grid">
+            <?php
+            // Nombres de los días
+            $nombres_dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            $fecha_actual = $lunes;
+
+            for ($i = 0; $i < 6; $i++):
+                $es_hoy   = ($fecha_actual === $hoy);
+                $dia_num  = date('d', strtotime($fecha_actual));
+                $citas    = $citas_por_dia[$fecha_actual] ?? [];
+            ?>
+            <!-- Columna de día -->
+            <div class="semana-dia <?= $es_hoy ? 'semana-dia-hoy' : '' ?>">
+
+                <!-- Cabecera del día -->
+                <div class="semana-dia-header">
+                    <span class="semana-dia-nombre"><?= $nombres_dias[$i] ?></span>
+                    <span class="semana-dia-numero <?= $es_hoy ? 'semana-numero-hoy' : '' ?>">
+                        <?= $dia_num ?>
+                    </span>
+                </div>
+
+                <!-- Citas del día -->
+                <div class="semana-dia-citas">
+                    <?php if (!empty($citas)): ?>
+                        <?php foreach ($citas as $cita): ?>
+                        <div class="semana-cita <?= $cita['estado'] === 'confirmada' ? 'semana-cita-confirmada' : 'semana-cita-pendiente' ?>">
+                            <!-- Hora de la cita -->
+                            <span class="semana-cita-hora">
+                                <?= substr($cita['hora'], 0, 5) ?>
+                            </span>
+                            <!-- Nombre del cliente -->
+                            <span class="semana-cita-cliente">
+                                <?= limpiar($cita['nombre']) ?> <?= limpiar($cita['apellidos']) ?>
+                            </span>
+                            <!-- Servicio -->
+                            <span class="semana-cita-servicio">
+                                <?= limpiar($cita['servicio']) ?>
+                            </span>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <!-- Sin citas ese día -->
+                        <p class="semana-sin-citas">Sin citas</p>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+            <?php
+                $fecha_actual = date('Y-m-d', strtotime($fecha_actual . ' +1 day'));
+            endfor;
+            ?>
+        </div>
+
+        <!-- ----------------------------------------
+             TABLA DE PRÓXIMAS RESERVAS
+             ---------------------------------------- -->
+        <h2 style="font-size:20px; letter-spacing:4px;
+                   text-transform:uppercase; margin-bottom:10px;
+                   margin-top:50px;">
             Próximas reservas
         </h2>
         <div class="linea-deco" style="margin-bottom:30px;"></div>
@@ -195,32 +217,17 @@ require_once dirname(__DIR__) . '/includes/header.php';
                 <tbody>
                     <?php while ($r = $reservas->fetch_assoc()): ?>
                     <tr>
-                        <!-- ID de la reserva -->
                         <td><?= $r['id'] ?></td>
-
-                        <!-- Nombre completo del cliente -->
                         <td><?= limpiar($r['nombre']) . ' ' . limpiar($r['apellidos']) ?></td>
-
-                        <!-- Teléfono del cliente -->
                         <td><?= limpiar($r['telefono']) ?></td>
-
-                        <!-- Servicio reservado -->
                         <td><?= limpiar($r['servicio']) ?></td>
-
-                        <!-- Fecha formateada en español -->
                         <td><?= date('d/m/Y', strtotime($r['fecha'])) ?></td>
-
-                        <!-- Hora -->
                         <td><?= limpiar($r['hora']) ?></td>
-
-                        <!-- Badge de estado coloreado -->
                         <td>
                             <span class="badge badge-<?= $r['estado'] ?>">
                                 <?= ucfirst($r['estado']) ?>
                             </span>
                         </td>
-
-                        <!-- Botones de acción -->
                         <td>
                             <a href="gestionar.php?accion=confirmar&id=<?= $r['id'] ?>"
                                class="btn-principal"
@@ -241,7 +248,6 @@ require_once dirname(__DIR__) . '/includes/header.php';
             </table>
         </div>
 
-        <!-- Enlace para ver y gestionar todas las reservas -->
         <div style="text-align:right; margin-top:20px;">
             <a href="gestionar.php" class="btn-principal"
                style="font-size:9px; padding:10px 24px;">
@@ -250,14 +256,12 @@ require_once dirname(__DIR__) . '/includes/header.php';
         </div>
 
         <?php else: ?>
-            <!-- Mensaje si no hay reservas todavía -->
             <p style="color:var(--blanco-suave); font-size:13px; letter-spacing:1px;">
                 No hay reservas registradas todavía.
             </p>
         <?php endif; ?>
 
     </main>
-
 </div>
 
 <?php
