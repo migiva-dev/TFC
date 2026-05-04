@@ -162,11 +162,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('iisss', $usuario_id, $servicio_id, $fecha, $hora, $notas);
 
                if ($stmt->execute()) {
-                // Obtenemos el ID de la reserva recién creada
-                $reserva_id = $stmt->insert_id;
+                
+               $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
+                         date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
                 $stmt->close();
-
-                // -- Creamos el evento en Google Calendar --
+                
                 // Obtenemos los datos del cliente para el evento
                 $stmt2 = $conexion->prepare(
                     "SELECT nombre, apellidos, telefono FROM usuarios WHERE id = ?"
