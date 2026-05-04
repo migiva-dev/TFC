@@ -172,38 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Obtenemos los datos del servicio para el evento
 
                 // Creamos el evento en Google Calendar
-                $cliente  = [
-                    'nombre'    => $cli_nombre,
-                    'apellidos' => $cli_apellidos,
-                    'telefono'  => $cli_telefono
-                ];
-                $servicio_data = [
-                    'nombre'   => $srv_nombre,
-                    'duracion' => $srv_duracion,
-                    'precio'   => $srv_precio
-                ];
-
-                $google_event_id = false;
-                /*
-                $google_event_id = google_crear_evento(
-                    $cliente,
-                    $servicio_data,
-                    $fecha,
-                    $hora,
-                    $notas
-                );
-                */
-
                 // Si se creó el evento guardamos su ID en la BD
-                if ($google_event_id) {
-                    $stmt4 = $conexion->prepare(
-                        "UPDATE reservas SET google_event_id = ? WHERE id = ?"
-                    );
-                    $stmt4->bind_param('si', $google_event_id, $reserva_id);
-                    $stmt4->execute();
-                    $stmt4->close();
-                }
-
                 $exito = '¡Reserva realizada con éxito! Te esperamos el ' .
                          date('d/m/Y', strtotime($fecha)) . ' a las ' . $hora . '.';
 
