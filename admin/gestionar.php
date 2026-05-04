@@ -11,7 +11,6 @@
 require_once dirname(__DIR__) . '/includes/config.php';
 require_once dirname(__DIR__) . '/includes/db.php';
 require_once dirname(__DIR__) . '/includes/funciones.php';
-require_once dirname(__DIR__) . '/includes/google-calendar.php';
 
 // -- Control de sesión --
 // Si no hay sesión de admin activa redirige al login
