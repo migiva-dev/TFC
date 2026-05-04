@@ -199,6 +199,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'precio'   => $srv_precio
                 ];
 
+                $google_event_id = false;
+                /*
                 $google_event_id = google_crear_evento(
                     $cliente,
                     $servicio_data,
@@ -206,6 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $hora,
                     $notas
                 );
+                */
 
                 // Si se creó el evento guardamos su ID en la BD
                 if ($google_event_id) {

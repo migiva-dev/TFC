@@ -74,10 +74,14 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
             if ($stmt->execute() && $stmt->affected_rows > 0) {
 
                 // Si había un evento en Google Calendar lo eliminamos
-                if (!empty($google_event_id)) {
-                    google_eliminar_evento($google_event_id);
-                }
+                } elseif ($accion === 'cancelar') {
 
+            $stmt = $conexion->prepare(
+                "UPDATE reservas SET estado = 'cancelada' WHERE id = ?"
+            );
+            $stmt->bind_param('i', $id);
+
+            if ($stmt->execute() && $stmt->affected_rows > 0) {
                 $mensaje = 'Reserva cancelada correctamente.';
                 $tipo    = 'exito';
             } else {
@@ -86,7 +90,6 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
             }
 
             $stmt->close();
-
         } else {
             // Acción no reconocida
             $mensaje = 'Acción no válida.';
