@@ -1122,3 +1122,179 @@ footer {
     .stats-grid { grid-template-columns: 1fr; }
     .admin-calendar-card iframe { min-height: 420px; }
 }
+
+/* =====================================================
+   CALENDARIO SEMANAL DEL DASHBOARD
+   ===================================================== */
+
+/* Grid de 6 columnas para Lun-Sáb */
+.semana-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 40px;
+}
+
+/* Cada columna de día */
+.semana-dia {
+    background-color: var(--negro-suave);
+    border: 1px solid var(--negro-borde);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+}
+
+.semana-dia:hover {
+    border-color: var(--plateado);
+}
+
+/* Día de hoy resaltado */
+.semana-dia-hoy {
+    border-color: var(--plateado);
+}
+
+/* Cabecera del día con nombre y número */
+.semana-dia-header {
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--negro-borde);
+    background-color: var(--negro);
+}
+
+.semana-dia-nombre {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blanco-suave);
+    margin-bottom: 4px;
+}
+
+.semana-dia-numero {
+    display: inline-block;
+    font-family: var(--fuente-titulo);
+    font-size: 22px;
+    color: var(--blanco);
+    line-height: 1;
+}
+
+/* Número del día de hoy en plateado */
+.semana-numero-hoy {
+    color: var(--plateado);
+}
+
+/* Contenedor de citas del día */
+.semana-dia-citas {
+    padding: 8px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Sin citas ese día */
+.semana-sin-citas {
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-top: 15px;
+}
+
+/* Tarjeta de cada cita */
+.semana-cita {
+    padding: 6px 8px;
+    border-left: 2px solid var(--plateado);
+    background-color: rgba(192, 192, 192, 0.05);
+    border-radius: 1px;
+}
+
+/* Cita confirmada — borde plateado */
+.semana-cita-confirmada {
+    border-left-color: var(--plateado);
+}
+
+/* Cita pendiente — borde amarillo */
+.semana-cita-pendiente {
+    border-left-color: #f0c040;
+}
+
+/* Hora de la cita */
+.semana-cita-hora {
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--plateado);
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+/* Nombre del cliente */
+.semana-cita-cliente {
+    display: block;
+    font-size: 10px;
+    color: var(--blanco);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Nombre del servicio */
+.semana-cita-servicio {
+    display: block;
+    font-size: 9px;
+    color: var(--blanco-suave);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =====================================================
+   NUEVA RESERVA — Layout dos columnas
+   ===================================================== */
+
+/* Grid de dos columnas: calendario + formulario */
+.nueva-reserva-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Columna del calendario */
+.nueva-reserva-calendario {
+    position: sticky;
+    top: 90px;
+}
+
+/* Columna del formulario */
+.nueva-reserva-form {
+    background-color: var(--negro-suave);
+    border: 1px solid var(--negro-borde);
+    padding: 35px 30px;
+}
+
+/* Responsive: en tablet/móvil se apila */
+@media (max-width: 900px) {
+    .semana-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .nueva-reserva-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nueva-reserva-calendario {
+        position: static;
+    }
+}
+
+@media (max-width: 600px) {
+    .semana-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
