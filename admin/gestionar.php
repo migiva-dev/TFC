@@ -18,65 +18,126 @@ requiere_admin();
 
 $titulo_pagina = 'Gestión de reservas';
 
+// Estados permitidos para evitar valores no válidos
+$estados_validos = ['pendiente', 'confirmada', 'cancelada'];
+
+// Recogemos el filtro de estado si se ha seleccionado
+$filtro = trim($_GET['filtro'] ?? '');
+if (!in_array($filtro, $estados_validos, true)) {
+    $filtro = '';
+}
+
 // Mensaje de confirmación o error tras una acción
-$mensaje = '';
-$tipo    = '';  // 'exito' o 'error'
+$mensaje = trim($_GET['msg'] ?? '');
+$tipo    = trim($_GET['tipo'] ?? '');
+
+if (!in_array($tipo, ['exito', 'error'], true)) {
+    $tipo = '';
+}
+
+// -------------------------------------------------------
+// Función auxiliar para redirigir después de una acción
+// Así evitamos que al refrescar la página se repita la acción
+// -------------------------------------------------------
+function redirigir_gestionar($mensaje, $tipo, $filtro = '') {
+    $params = [
+        'msg'  => $mensaje,
+        'tipo' => $tipo
+    ];
+
+    if (!empty($filtro)) {
+        $params['filtro'] = $filtro;
+    }
+
+    header('Location: gestionar.php?' . http_build_query($params));
+    exit;
+}
 
 // -------------------------------------------------------
 // Procesamos la acción recibida por GET (confirmar/cancelar)
 // -------------------------------------------------------
-if (isset($_GET['accion']) && isset($_GET['id'])) {
+if (isset($_GET['accion'], $_GET['id'])) {
 
     // Recogemos y validamos los parámetros
     $accion = trim($_GET['accion'] ?? '');
-    $id     = intval($_GET['id']   ?? 0);
+    $id     = intval($_GET['id'] ?? 0);
 
     // El id debe ser un número positivo
-    if ($id > 0) {
+    if ($id <= 0) {
+        redirigir_gestionar('ID de reserva no válido.', 'error', $filtro);
+    }
 
-        // Comprobamos qué acción se quiere realizar
-        if ($accion === 'confirmar') {
+    if ($accion === 'confirmar') {
 
-            // Cambiamos el estado de la reserva a 'confirmada'
-            $stmt = $conexion->prepare(
-                "UPDATE reservas SET estado = 'confirmada' WHERE id = ?"
-            );
-            $stmt->bind_param('i', $id);
+        // Cambiamos el estado de la reserva a 'confirmada'
+        $stmt = $conexion->prepare(
+            "UPDATE reservas
+             SET estado = 'confirmada'
+             WHERE id = ? AND estado != 'confirmada'"
+        );
+        $stmt->bind_param('i', $id);
 
-            if ($stmt->execute() && $stmt->affected_rows > 0) {
-                $mensaje = 'Reserva confirmada correctamente.';
-                $tipo    = 'exito';
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                $stmt->close();
+                redirigir_gestionar('Reserva confirmada correctamente.', 'exito', $filtro);
             } else {
-                $mensaje = 'No se pudo confirmar la reserva.';
-                $tipo    = 'error';
+                $stmt->close();
+                redirigir_gestionar('La reserva ya estaba confirmada o no existe.', 'error', $filtro);
             }
-
-            $stmt->close();
-
-        } elseif ($accion === 'cancelar') {
-
-            // Cambiamos el estado de la reserva a 'cancelada'
-            $stmt = $conexion->prepare(
-                "UPDATE reservas SET estado = 'cancelada' WHERE id = ?"
-            );
-            $stmt->bind_param('i', $id);
-
-            if ($stmt->execute() && $stmt->affected_rows > 0) {
-
-                $mensaje = 'Reserva cancelada correctamente.';
-                $tipo    = 'exito';
-            } else {
-                $mensaje = 'No se pudo cancelar la reserva.';
-                $tipo    = 'error';
-            }
-
-            $stmt->close();
-
         } else {
-            // Acción no reconocida
-            $mensaje = 'Acción no válida.';
-            $tipo    = 'error';
+            $stmt->close();
+            redirigir_gestionar('No se pudo confirmar la reserva.', 'error', $filtro);
         }
+
+    } elseif ($accion === 'cancelar') {
+
+        // Antes de cancelar, intentamos obtener el ID del evento de Google Calendar si existe la columna
+        // Esto no rompe la página si no tienes configurada la función google_cancelar_evento().
+        $google_event_id = null;
+
+        $stmt_evento = $conexion->prepare(
+            "SELECT google_event_id FROM reservas WHERE id = ? LIMIT 1"
+        );
+
+        if ($stmt_evento) {
+            $stmt_evento->bind_param('i', $id);
+            $stmt_evento->execute();
+            $stmt_evento->bind_result($google_event_id);
+            $stmt_evento->fetch();
+            $stmt_evento->close();
+        }
+
+        // Cambiamos el estado de la reserva a 'cancelada'
+        $stmt = $conexion->prepare(
+            "UPDATE reservas
+             SET estado = 'cancelada'
+             WHERE id = ? AND estado != 'cancelada'"
+        );
+        $stmt->bind_param('i', $id);
+
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                $stmt->close();
+
+                // Si existe la función y hay evento asociado, intentamos cancelarlo también en Google Calendar
+                if (!empty($google_event_id) && function_exists('google_cancelar_evento')) {
+                    google_cancelar_evento($google_event_id);
+                }
+
+                redirigir_gestionar('Reserva cancelada correctamente.', 'exito', $filtro);
+            } else {
+                $stmt->close();
+                redirigir_gestionar('La reserva ya estaba cancelada o no existe.', 'error', $filtro);
+            }
+        } else {
+            $stmt->close();
+            redirigir_gestionar('No se pudo cancelar la reserva.', 'error', $filtro);
+        }
+
+    } else {
+        // Acción no reconocida
+        redirigir_gestionar('Acción no válida.', 'error', $filtro);
     }
 }
 
@@ -84,11 +145,8 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
 // Consulta de reservas con filtro de estado opcional
 // -------------------------------------------------------
 
-// Recogemos el filtro de estado si se ha seleccionado
-$filtro = trim($_GET['filtro'] ?? '');
-
 // Construimos la consulta según el filtro
-if (!empty($filtro) && in_array($filtro, ['pendiente', 'confirmada', 'cancelada'])) {
+if (!empty($filtro)) {
     // Filtramos por estado concreto
     $stmt = $conexion->prepare(
         "SELECT r.id, r.fecha, r.hora, r.estado, r.notas,
@@ -103,7 +161,6 @@ if (!empty($filtro) && in_array($filtro, ['pendiente', 'confirmada', 'cancelada'
     $stmt->bind_param('s', $filtro);
     $stmt->execute();
     $reservas = $stmt->get_result();
-    $stmt->close();
 
 } else {
     // Sin filtro: traemos todas las reservas
@@ -226,7 +283,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                     <?php while ($r = $reservas->fetch_assoc()): ?>
                     <tr>
                         <!-- ID -->
-                        <td><?= $r['id'] ?></td>
+                        <td><?= intval($r['id']) ?></td>
 
                         <!-- Nombre completo del cliente -->
                         <td><?= limpiar($r['nombre']) . ' ' . limpiar($r['apellidos']) ?></td>
@@ -244,7 +301,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                         <td><?= date('d/m/Y', strtotime($r['fecha'])) ?></td>
 
                         <!-- Hora -->
-                        <td><?= limpiar($r['hora']) ?></td>
+                        <td><?= limpiar(substr($r['hora'], 0, 5)) ?></td>
 
                         <!-- Notas del cliente -->
                         <td style="max-width:150px; font-size:11px;">
@@ -253,8 +310,8 @@ require_once dirname(__DIR__) . '/includes/header.php';
 
                         <!-- Badge de estado -->
                         <td>
-                            <span class="badge badge-<?= $r['estado'] ?>">
-                                <?= ucfirst($r['estado']) ?>
+                            <span class="badge badge-<?= limpiar($r['estado']) ?>">
+                                <?= ucfirst(limpiar($r['estado'])) ?>
                             </span>
                         </td>
 
@@ -263,7 +320,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
 
                             <?php if ($r['estado'] !== 'confirmada'): ?>
                             <!-- Botón confirmar (solo si no está ya confirmada) -->
-                            <a href="gestionar.php?accion=confirmar&id=<?= $r['id'] ?>&filtro=<?= $filtro ?>"
+                            <a href="gestionar.php?accion=confirmar&id=<?= intval($r['id']) ?>&filtro=<?= urlencode($filtro) ?>"
                                class="btn-principal"
                                style="font-size:9px; padding:6px 12px; margin-right:4px;">
                                 Confirmar
@@ -272,10 +329,11 @@ require_once dirname(__DIR__) . '/includes/header.php';
 
                             <?php if ($r['estado'] !== 'cancelada'): ?>
                             <!-- Botón cancelar (solo si no está ya cancelada) -->
-                            <a href="gestionar.php?accion=cancelar&id=<?= $r['id'] ?>&filtro=<?= $filtro ?>"
+                            <a href="gestionar.php?accion=cancelar&id=<?= intval($r['id']) ?>&filtro=<?= urlencode($filtro) ?>"
                                class="btn-principal"
                                style="font-size:9px; padding:6px 12px;
-                                      color:#ff6b6b; border-color:#ff6b6b;">
+                                      color:#ff6b6b; border-color:#ff6b6b;"
+                               onclick="return confirm('¿Seguro que quieres cancelar esta reserva?');">
                                 Cancelar
                             </a>
                             <?php endif; ?>
@@ -290,7 +348,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
         <?php else: ?>
             <!-- Mensaje si no hay reservas con ese filtro -->
             <p style="color:var(--blanco-suave); font-size:13px; letter-spacing:1px;">
-                No hay reservas <?= !empty($filtro) ? $filtro . 's' : '' ?> registradas.
+                No hay reservas <?= !empty($filtro) ? limpiar($filtro) . 's' : '' ?> registradas.
             </p>
         <?php endif; ?>
 
@@ -299,6 +357,10 @@ require_once dirname(__DIR__) . '/includes/header.php';
 </div>
 
 <?php
+if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+    $stmt->close();
+}
+
 $conexion->close();
 require_once dirname(__DIR__) . '/includes/footer.php';
 ?>
