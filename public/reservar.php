@@ -168,14 +168,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->close();
                 
                 // Obtenemos los datos del cliente para el evento
-                $stmt2 = $conexion->prepare(
-                    "SELECT nombre, apellidos, telefono FROM usuarios WHERE id = ?"
-                );
-                $stmt2->bind_param('i', $usuario_id);
-                $stmt2->execute();
-                $stmt2->bind_result($cli_nombre, $cli_apellidos, $cli_telefono);
-                $stmt2->fetch();
-                $stmt2->close();
 
                 // Obtenemos los datos del servicio para el evento
                 $stmt3 = $conexion->prepare(
