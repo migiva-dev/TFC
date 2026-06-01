@@ -25,6 +25,9 @@ $usuario_nombre = $_SESSION[USER_SESSION_KEY]['nombre'];
 // -- Consulta: obtenemos todos los servicios disponibles --
 $servicios = $conexion->query("SELECT * FROM servicios ORDER BY precio ASC");
 
+// Mantiene el servicio seleccionado al cambiar de fecha o venir desde servicios.php
+$servicio_preseleccionado = intval($_POST['servicio_id'] ?? $_GET['servicio'] ?? 0);
+
 // -- Horas disponibles para reservar --
 // De 9:00 a 19:30 cada 30 minutos
 $horas_disponibles = [];
@@ -292,7 +295,7 @@ require_once '../includes/header.php';
 
     <!-- Solo mostramos el formulario si no hay reserva exitosa -->
     <?php if (empty($exito)): ?>
-    <form method="POST" action="reservar.php">
+    <form method="POST" action="reservar.php?mes=<?= $mes_actual ?>&anio=<?= $anio_actual ?>">
 
         <!-- Servicio -->
         <div class="campo-grupo">
@@ -302,8 +305,7 @@ require_once '../includes/header.php';
                 <?php
                 // Rellenamos el select con los servicios de la BD
                 if ($servicios && $servicios->num_rows > 0):
-                    // Si viene de servicios.php con ?servicio=X lo preseleccionamos
-                    $servicio_preseleccionado = intval($_GET['servicio'] ?? 0);
+                    // Si viene de servicios.php o se ha cambiado la fecha, lo mantenemos seleccionado
                     while ($s = $servicios->fetch_assoc()):
                         $selected = ($s['id'] == $servicio_preseleccionado) ? 'selected' : '';
                 ?>
@@ -524,6 +526,31 @@ require_once '../includes/header.php';
     </p>
 
 </div>
+
+
+<script>
+function seleccionarFecha(fecha) {
+    const campoFecha = document.getElementById('fecha');
+    const formulario = campoFecha ? campoFecha.closest('form') : null;
+
+    if (!campoFecha || !formulario) {
+        return;
+    }
+
+    campoFecha.value = fecha;
+
+    let consultar = formulario.querySelector('input[name="consultar_horas"]');
+    if (!consultar) {
+        consultar = document.createElement('input');
+        consultar.type = 'hidden';
+        consultar.name = 'consultar_horas';
+        consultar.value = '1';
+        formulario.appendChild(consultar);
+    }
+
+    formulario.submit();
+}
+</script>
 
 <?php
 $conexion->close();
