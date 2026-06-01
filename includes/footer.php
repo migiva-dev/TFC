@@ -19,7 +19,7 @@
             <a href="<?= SITIO_URL ?>/index.php" style="display:inline-block; margin-bottom:15px;">
                 <img src="https://tfc-peluqueria.atwebpages.com/assets/img/logo.png"
                      alt="Dioni Peluqueros"
-                     style="height:45px; width:auto;">
+                     class="logo-img">
             </a>
             <p>Barbería & Estilismo</p>
             <p>Valencia</p>
