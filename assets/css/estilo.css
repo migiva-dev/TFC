@@ -1298,3 +1298,173 @@ footer {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* =====================================================
+   LOGO, FILTROS ADMIN Y MÓVIL
+   ===================================================== */
+
+/* El logo ahora se controla desde CSS. En header/footer se ha quitado la altura fija inline. */
+.logo img,
+.logo-img {
+    height: 64px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+}
+
+footer .logo-img {
+    height: 58px;
+    margin: 0 auto 8px;
+}
+
+/* Subimos la altura del nav para que el logo grande respire. */
+nav {
+    height: 86px;
+}
+
+/* Filtros del panel de reservas */
+.filtros-reservas-admin {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(130px, 1fr));
+    gap: 14px;
+    align-items: end;
+    margin-bottom: 32px;
+    padding: 18px;
+    background-color: var(--negro-suave);
+    border: 1px solid var(--negro-borde);
+}
+
+.campo-filtro label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blanco-suave);
+    margin-bottom: 7px;
+}
+
+.campo-filtro input,
+.campo-filtro select {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    background-color: var(--negro);
+    border: 1px solid var(--negro-borde);
+    color: var(--blanco);
+    font-family: var(--fuente-cuerpo);
+    font-size: 12px;
+    outline: none;
+}
+
+.campo-filtro input:focus,
+.campo-filtro select:focus {
+    border-color: var(--plateado);
+}
+
+.campo-filtro-buscar {
+    grid-column: span 2;
+}
+
+.campo-filtro-botones {
+    display: flex;
+    gap: 10px;
+}
+
+.campo-filtro-botones .btn-secundario,
+.campo-filtro-botones .btn-principal {
+    min-height: 42px;
+    padding: 12px 18px;
+    font-size: 9px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Mejora de calendario y tablas en pantallas pequeñas */
+@media (max-width: 1024px) {
+    .filtros-reservas-admin {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .campo-filtro-buscar {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    nav {
+        height: 78px;
+    }
+
+    .logo img,
+    .logo-img {
+        height: 56px;
+    }
+
+    .nav-links {
+        top: 78px;
+    }
+
+    .calendario {
+        padding: 14px;
+    }
+
+    .calendario-grid {
+        gap: 3px;
+    }
+
+    .calendario-header h3 {
+        font-size: 15px;
+        letter-spacing: 2px;
+    }
+
+    .calendario-nav {
+        padding: 5px 9px;
+    }
+
+    .tabla-reservas {
+        min-width: 920px;
+    }
+
+    .filtros-reservas-admin {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .campo-filtro-buscar,
+    .campo-filtro-botones {
+        grid-column: auto;
+    }
+
+    .campo-filtro-botones {
+        flex-direction: column;
+    }
+
+    .campo-filtro-botones .btn-secundario,
+    .campo-filtro-botones .btn-principal {
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .logo img,
+    .logo-img {
+        height: 48px;
+    }
+
+    nav {
+        height: 70px;
+    }
+
+    .nav-links {
+        top: 70px;
+    }
+
+    .calendario-dias-semana span {
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .calendario-dia {
+        font-size: 9px;
+    }
+}
