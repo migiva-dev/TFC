@@ -65,6 +65,8 @@ while ($c = $reservas_semana->fetch_assoc()) {
 
 // -------------------------------------------------------
 // Próximas 10 reservas
+// Solo se muestran citas desde hoy en adelante.
+// Así no aparecen reservas antiguas de abril/mayo si hoy ya es junio.
 // -------------------------------------------------------
 $reservas = $conexion->query(
     "SELECT r.id, r.fecha, r.hora, r.estado, r.notas,
@@ -73,6 +75,8 @@ $reservas = $conexion->query(
      FROM reservas r
      JOIN usuarios  u ON r.usuario_id  = u.id
      JOIN servicios s ON r.servicio_id = s.id
+     WHERE r.fecha >= CURDATE()
+     AND r.estado != 'cancelada'
      ORDER BY r.fecha ASC, r.hora ASC
      LIMIT 10"
 );
