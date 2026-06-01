@@ -30,7 +30,7 @@ iniciar_sesion();
         <a href="<?= SITIO_URL ?>/index.php" class="logo">
             <img src="https://tfc-peluqueria.atwebpages.com/assets/img/logo.png"
                  alt="Dioni Peluqueros"
-                 style="height:45px; width:auto;">
+                 class="logo-img">
         </a>
 
         <!-- Botón hamburguesa visible solo en móvil -->
