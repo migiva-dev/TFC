@@ -27,6 +27,25 @@ if (!in_array($filtro, $estados_validos, true)) {
     $filtro = '';
 }
 
+// Filtros adicionales: rango rápido, fechas concretas y búsqueda por cliente/teléfono/servicio
+$rango  = trim($_GET['rango'] ?? 'proximas');
+$desde  = trim($_GET['desde'] ?? '');
+$hasta  = trim($_GET['hasta'] ?? '');
+$buscar = trim($_GET['buscar'] ?? '');
+
+$rangos_validos = ['todas', 'proximas', 'hoy', 'semana', 'mes'];
+if (!in_array($rango, $rangos_validos, true)) {
+    $rango = 'proximas';
+}
+
+// Validamos formato YYYY-MM-DD para evitar valores incorrectos
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $desde)) {
+    $desde = '';
+}
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $hasta)) {
+    $hasta = '';
+}
+
 // Mensaje de confirmación o error tras una acción
 $mensaje = trim($_GET['msg'] ?? '');
 $tipo    = trim($_GET['tipo'] ?? '');
@@ -39,19 +58,29 @@ if (!in_array($tipo, ['exito', 'error'], true)) {
 // Función auxiliar para redirigir después de una acción
 // Así evitamos que al refrescar la página se repita la acción
 // -------------------------------------------------------
-function redirigir_gestionar($mensaje, $tipo, $filtro = '') {
+function redirigir_gestionar($mensaje, $tipo, $params_actuales = []) {
     $params = [
         'msg'  => $mensaje,
         'tipo' => $tipo
     ];
 
-    if (!empty($filtro)) {
-        $params['filtro'] = $filtro;
+    foreach (['filtro', 'rango', 'desde', 'hasta', 'buscar'] as $clave) {
+        if (!empty($params_actuales[$clave])) {
+            $params[$clave] = $params_actuales[$clave];
+        }
     }
 
     header('Location: gestionar.php?' . http_build_query($params));
     exit;
 }
+
+$filtros_actuales = [
+    'filtro' => $filtro,
+    'rango'  => $rango,
+    'desde'  => $desde,
+    'hasta'  => $hasta,
+    'buscar' => $buscar
+];
 
 // -------------------------------------------------------
 // Procesamos la acción recibida por GET (confirmar/cancelar)
@@ -64,7 +93,7 @@ if (isset($_GET['accion'], $_GET['id'])) {
 
     // El id debe ser un número positivo
     if ($id <= 0) {
-        redirigir_gestionar('ID de reserva no válido.', 'error', $filtro);
+        redirigir_gestionar('ID de reserva no válido.', 'error', $filtros_actuales);
     }
 
     if ($accion === 'confirmar') {
@@ -80,14 +109,14 @@ if (isset($_GET['accion'], $_GET['id'])) {
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
                 $stmt->close();
-                redirigir_gestionar('Reserva confirmada correctamente.', 'exito', $filtro);
+                redirigir_gestionar('Reserva confirmada correctamente.', 'exito', $filtros_actuales);
             } else {
                 $stmt->close();
-                redirigir_gestionar('La reserva ya estaba confirmada o no existe.', 'error', $filtro);
+                redirigir_gestionar('La reserva ya estaba confirmada o no existe.', 'error', $filtros_actuales);
             }
         } else {
             $stmt->close();
-            redirigir_gestionar('No se pudo confirmar la reserva.', 'error', $filtro);
+            redirigir_gestionar('No se pudo confirmar la reserva.', 'error', $filtros_actuales);
         }
 
     } elseif ($accion === 'cancelar') {
@@ -125,55 +154,88 @@ if (isset($_GET['accion'], $_GET['id'])) {
                     google_cancelar_evento($google_event_id);
                 }
 
-                redirigir_gestionar('Reserva cancelada correctamente.', 'exito', $filtro);
+                redirigir_gestionar('Reserva cancelada correctamente.', 'exito', $filtros_actuales);
             } else {
                 $stmt->close();
-                redirigir_gestionar('La reserva ya estaba cancelada o no existe.', 'error', $filtro);
+                redirigir_gestionar('La reserva ya estaba cancelada o no existe.', 'error', $filtros_actuales);
             }
         } else {
             $stmt->close();
-            redirigir_gestionar('No se pudo cancelar la reserva.', 'error', $filtro);
+            redirigir_gestionar('No se pudo cancelar la reserva.', 'error', $filtros_actuales);
         }
 
     } else {
         // Acción no reconocida
-        redirigir_gestionar('Acción no válida.', 'error', $filtro);
+        redirigir_gestionar('Acción no válida.', 'error', $filtros_actuales);
     }
 }
 
 // -------------------------------------------------------
-// Consulta de reservas con filtro de estado opcional
+// Consulta de reservas con filtros
 // -------------------------------------------------------
+$where  = [];
+$params = [];
+$types  = '';
 
-// Construimos la consulta según el filtro
 if (!empty($filtro)) {
-    // Filtramos por estado concreto
-    $stmt = $conexion->prepare(
-        "SELECT r.id, r.fecha, r.hora, r.estado, r.notas,
-                u.nombre, u.apellidos, u.telefono,
-                s.nombre AS servicio, s.precio
-         FROM reservas r
-         JOIN usuarios  u ON r.usuario_id  = u.id
-         JOIN servicios s ON r.servicio_id = s.id
-         WHERE r.estado = ?
-         ORDER BY r.fecha ASC, r.hora ASC"
-    );
-    $stmt->bind_param('s', $filtro);
-    $stmt->execute();
-    $reservas = $stmt->get_result();
-
-} else {
-    // Sin filtro: traemos todas las reservas
-    $reservas = $conexion->query(
-        "SELECT r.id, r.fecha, r.hora, r.estado, r.notas,
-                u.nombre, u.apellidos, u.telefono,
-                s.nombre AS servicio, s.precio
-         FROM reservas r
-         JOIN usuarios  u ON r.usuario_id  = u.id
-         JOIN servicios s ON r.servicio_id = s.id
-         ORDER BY r.fecha ASC, r.hora ASC"
-    );
+    $where[]  = 'r.estado = ?';
+    $params[] = $filtro;
+    $types   .= 's';
 }
+
+// Si no se indican fechas manuales, usamos el rango rápido seleccionado
+if (empty($desde) && empty($hasta)) {
+    if ($rango === 'proximas') {
+        $where[] = "r.fecha >= CURDATE()";
+        $where[] = "r.estado != 'cancelada'";
+    } elseif ($rango === 'hoy') {
+        $where[] = "r.fecha = CURDATE()";
+    } elseif ($rango === 'semana') {
+        $where[] = "r.fecha BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)";
+        $where[] = "r.estado != 'cancelada'";
+    } elseif ($rango === 'mes') {
+        $where[] = "r.fecha BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH)";
+        $where[] = "r.estado != 'cancelada'";
+    }
+}
+
+if (!empty($desde)) {
+    $where[]  = 'r.fecha >= ?';
+    $params[] = $desde;
+    $types   .= 's';
+}
+
+if (!empty($hasta)) {
+    $where[]  = 'r.fecha <= ?';
+    $params[] = $hasta;
+    $types   .= 's';
+}
+
+if (!empty($buscar)) {
+    $where[]  = "CONCAT(u.nombre, ' ', u.apellidos, ' ', u.telefono, ' ', s.nombre) LIKE ?";
+    $params[] = '%' . $buscar . '%';
+    $types   .= 's';
+}
+
+$sql = "SELECT r.id, r.fecha, r.hora, r.estado, r.notas,
+               u.nombre, u.apellidos, u.telefono,
+               s.nombre AS servicio, s.precio
+        FROM reservas r
+        JOIN usuarios  u ON r.usuario_id  = u.id
+        JOIN servicios s ON r.servicio_id = s.id";
+
+if (!empty($where)) {
+    $sql .= ' WHERE ' . implode(' AND ', $where);
+}
+
+$sql .= ' ORDER BY r.fecha ASC, r.hora ASC';
+
+$stmt = $conexion->prepare($sql);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$reservas = $stmt->get_result();
 
 // Incluimos la cabecera común
 require_once dirname(__DIR__) . '/includes/header.php';
@@ -225,39 +287,68 @@ require_once dirname(__DIR__) . '/includes/header.php';
         <?php endif; ?>
 
         <!-- ----------------------------------------
-             FILTROS DE ESTADO
+             FILTROS DE BÚSQUEDA
              ---------------------------------------- -->
-        <div style="margin-bottom:30px; display:flex; gap:10px; flex-wrap:wrap;">
+        <form method="GET" action="gestionar.php" class="filtros-reservas-admin">
 
-            <!-- Botón todas las reservas -->
-            <a href="gestionar.php"
-               class="<?= empty($filtro) ? 'btn-secundario' : 'btn-principal' ?>"
-               style="font-size:9px; padding:8px 20px;">
-                Todas
-            </a>
+            <div class="campo-filtro">
+                <label for="rango">Rango</label>
+                <select id="rango" name="rango">
+                    <option value="proximas" <?= $rango === 'proximas' ? 'selected' : '' ?>>Próximas citas</option>
+                    <option value="hoy" <?= $rango === 'hoy' ? 'selected' : '' ?>>Hoy</option>
+                    <option value="semana" <?= $rango === 'semana' ? 'selected' : '' ?>>Próximos 7 días</option>
+                    <option value="mes" <?= $rango === 'mes' ? 'selected' : '' ?>>Próximo mes</option>
+                    <option value="todas" <?= $rango === 'todas' ? 'selected' : '' ?>>Todas</option>
+                </select>
+            </div>
 
-            <!-- Botón filtro pendientes -->
-            <a href="gestionar.php?filtro=pendiente"
-               class="<?= $filtro === 'pendiente' ? 'btn-secundario' : 'btn-principal' ?>"
-               style="font-size:9px; padding:8px 20px;">
-                Pendientes
-            </a>
+            <div class="campo-filtro">
+                <label for="filtro">Estado</label>
+                <select id="filtro" name="filtro">
+                    <option value="" <?= empty($filtro) ? 'selected' : '' ?>>Todos</option>
+                    <option value="pendiente" <?= $filtro === 'pendiente' ? 'selected' : '' ?>>Pendientes</option>
+                    <option value="confirmada" <?= $filtro === 'confirmada' ? 'selected' : '' ?>>Confirmadas</option>
+                    <option value="cancelada" <?= $filtro === 'cancelada' ? 'selected' : '' ?>>Canceladas</option>
+                </select>
+            </div>
 
-            <!-- Botón filtro confirmadas -->
-            <a href="gestionar.php?filtro=confirmada"
-               class="<?= $filtro === 'confirmada' ? 'btn-secundario' : 'btn-principal' ?>"
-               style="font-size:9px; padding:8px 20px;">
-                Confirmadas
-            </a>
+            <div class="campo-filtro">
+                <label for="desde">Desde</label>
+                <input type="date" id="desde" name="desde" value="<?= limpiar($desde) ?>">
+            </div>
 
-            <!-- Botón filtro canceladas -->
-            <a href="gestionar.php?filtro=cancelada"
-               class="<?= $filtro === 'cancelada' ? 'btn-secundario' : 'btn-principal' ?>"
-               style="font-size:9px; padding:8px 20px;">
-                Canceladas
-            </a>
+            <div class="campo-filtro">
+                <label for="hasta">Hasta</label>
+                <input type="date" id="hasta" name="hasta" value="<?= limpiar($hasta) ?>">
+            </div>
 
-        </div>
+            <div class="campo-filtro campo-filtro-buscar">
+                <label for="buscar">Cliente / teléfono / servicio</label>
+                <input type="text" id="buscar" name="buscar"
+                       value="<?= limpiar($buscar) ?>"
+                       placeholder="Ej: Miguel, 600..., corte">
+            </div>
+
+            <div class="campo-filtro campo-filtro-botones">
+                <button type="submit" class="btn-secundario">Filtrar</button>
+                <a href="gestionar.php?rango=proximas" class="btn-principal">Limpiar</a>
+            </div>
+
+        </form>
+
+        <?php
+        $query_filtros_array = [
+            'filtro' => $filtro,
+            'rango'  => $rango,
+            'desde'  => $desde,
+            'hasta'  => $hasta,
+            'buscar' => $buscar
+        ];
+        $query_filtros_array = array_filter($query_filtros_array, function($valor) {
+            return $valor !== '';
+        });
+        $query_filtros = http_build_query($query_filtros_array);
+        ?>
 
         <!-- ----------------------------------------
              TABLA DE TODAS LAS RESERVAS
@@ -320,7 +411,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
 
                             <?php if ($r['estado'] !== 'confirmada'): ?>
                             <!-- Botón confirmar (solo si no está ya confirmada) -->
-                            <a href="gestionar.php?accion=confirmar&id=<?= intval($r['id']) ?>&filtro=<?= urlencode($filtro) ?>"
+                            <a href="gestionar.php?accion=confirmar&id=<?= intval($r['id']) ?>&<?= $query_filtros ?>"
                                class="btn-principal"
                                style="font-size:9px; padding:6px 12px; margin-right:4px;">
                                 Confirmar
@@ -329,7 +420,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
 
                             <?php if ($r['estado'] !== 'cancelada'): ?>
                             <!-- Botón cancelar (solo si no está ya cancelada) -->
-                            <a href="gestionar.php?accion=cancelar&id=<?= intval($r['id']) ?>&filtro=<?= urlencode($filtro) ?>"
+                            <a href="gestionar.php?accion=cancelar&id=<?= intval($r['id']) ?>&<?= $query_filtros ?>"
                                class="btn-principal"
                                style="font-size:9px; padding:6px 12px;
                                       color:#ff6b6b; border-color:#ff6b6b;"
@@ -348,7 +439,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
         <?php else: ?>
             <!-- Mensaje si no hay reservas con ese filtro -->
             <p style="color:var(--blanco-suave); font-size:13px; letter-spacing:1px;">
-                No hay reservas <?= !empty($filtro) ? limpiar($filtro) . 's' : '' ?> registradas.
+                No hay reservas que coincidan con los filtros seleccionados.
             </p>
         <?php endif; ?>
 
